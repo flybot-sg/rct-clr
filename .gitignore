@@ -1,0 +1,41 @@
+.clj-kondo/.cache/
+.clj-kondo/*/
+.calva/
+.vscode/
+.lsp/
+.nrepl-port
+.cpcache/
+.gitlibs/
+.rebel*
+*.log
+.idea
+.DS_Store
+
+# Generated test file (created by bb gen-clr-rct)
+test/rct_clr/rct_generated_test.cljc
+
+# Building with nos
+build/
+deps/
+
+# Personal AI assistant config
+.clojure-mcp/
+.claude/settings.local.json
+
+# Ignore common tool caches and build dirs in all subdirectories
+**/.clj-kondo/**
+!**/.clj-kondo/config.edn
+**/.cpcache/**
+**/.lsp/**
+**/.calva/**
+**/.vscode/**
+**/.nrepl-*
+**/.clojure/**
+**/target/
+
+# Java & deps
+*.jar
+*.class
+/lib/
+/classes/
+/checkouts/
