@@ -12,7 +12,7 @@
             [rewrite-clj.zip :as z]))
 
 (defn find-cljc-files
-  "Find all .cljc files in dir."
+  "Find all .cljc files in dir. Ignores .clj — CLR can only run .cljc."
   [dir]
   (->> (io/file dir)
        file-seq
@@ -84,10 +84,13 @@
   (string/replace (str ns-sym) "." "-"))
 
 (defn write-block-fn
-  "Write a defn- for a single ^:rct/test block, one eval form per line."
+  "Write a defn- for a single ^:rct/test block, one eval form per line.
+  Each form is wrapped in (eval (quote ...)) so it resolves in the source
+  namespace at test time, not the generated test namespace."
   [w fn-sym block-data ns-sym file output-ns]
   (let [file-name (.getName file)]
     (.write w (str "(defn- " fn-sym " []\n"))
+    ;; prn, not pprint — pprint drops metadata (e.g. ^:matcho/strict)
     (binding [*out* w
               *print-meta* true]
       (doseq [datum block-data]
@@ -103,7 +106,8 @@
     (.write w ")\n")))
 
 (defn write-deftest
-  "Write a deftest that calls block fns in order."
+  "Write a deftest that calls block fns in order.
+  Binds *ns* to the source namespace so eval'd forms resolve there."
   [w ns-sym block-infos]
   (let [test-sym (str (ns-sym->test-base ns-sym) "-rct")]
     (.write w (str "(deftest " test-sym "\n"))
@@ -124,7 +128,8 @@
    :error/data (ex-data e)})")
 
 (defn write-preamble
-  "Write the ns form and error->map helper."
+  "Write the ns form and error->map helper.
+  The ns is tagged ^:clr-only so Kaocha skips it on the JVM."
   [w output-ns ns-syms]
   (let [requires (sort ns-syms)
         req-lines (map #(str "            [" % "]") requires)
