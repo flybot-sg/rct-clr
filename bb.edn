@@ -13,12 +13,13 @@
          rct
          {:doc  "Run rct"
           :task (clojure "-M:dev:test --focus :rct")}
-         test
-         {:doc  "Run all tests"
-          :task (clojure (apply str "-M:dev:test " (interpose " " *command-line-args*)))}
          gen-clr-rct
          {:doc  "Generate CLR-compatible RCT test file from ^:rct/test blocks"
           :task (clojure "-M:dev -m rct-clr.gen -o test/rct_clr/rct_generated_test.cljc -n rct-clr.rct-generated-test")}
+         test
+         {:doc  "Run all tests"
+          :task (do (run 'gen-clr-rct)
+                    (clojure (apply str "-M:dev:test " (interpose " " *command-line-args*))))}
          clr-test
          {:doc  "Regenerate RCT tests, clear deps cache, and run CLR tests"
           :task (do (run 'gen-clr-rct)

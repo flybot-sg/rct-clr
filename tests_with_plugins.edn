@@ -3,4 +3,6 @@
   :tests [{:id :rct
            :focus-meta [:rct]}
           {:id :unit
-           :skip-meta [:rct]}]}
+           :skip-meta [:rct]}]
+  :plugins [:kaocha.plugin/profiling
+            :kaocha.plugin/cloverage]}
