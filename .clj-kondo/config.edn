@@ -1,1 +1,3 @@
-{:cljc {:features #{:clj}}}
+{:cljc {:features #{:clj}}
+ :lint-as {rct-clr.gen-test/with-tmp-dir     clojure.core/let
+           rct-clr.gen-test/with-gen-project clojure.core/let}}

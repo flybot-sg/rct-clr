@@ -11,8 +11,6 @@
 .idea
 .DS_Store
 
-# Generated test file (created by bb gen-clr-rct)
-test/rct_clr/rct_generated_test.cljc
 
 # Building with nos
 build/
