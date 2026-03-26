@@ -29,7 +29,7 @@
   ;; gen.cljc:114
   (testing "gen.cljc:114" (eval (quote (clojure.test/is (= 3 (count (read-expectation {:expectation-type (quote =>), :expectation-string "[1 2 ...]"} (quote rct-clr.gen))))))))
   ;; gen.cljc:120
-  (testing "gen.cljc:120" (eval (quote (try (read-expectation {:expectation-type (quote =>), :expectation-string "[1 2"} (quote rct-clr.gen)) (clojure.test/is false "Expected exception") (catch Exception e (matcho.core/assert {} (rct-clr.rct-generated-test/error->map e))))))))
+  (testing "gen.cljc:120" (eval (quote (try (read-expectation {:expectation-type (quote =>), :expectation-string "[1 2"} (quote rct-clr.gen)) (clojure.test/is false "Expected exception") (catch System.Exception e (matcho.core/assert {} (rct-clr.rct-generated-test/error->map e))))))))
 (defn- rct-clr-gen-rct-block-2 []
   ;; gen.cljc:147
   (testing "gen.cljc:147" (eval (quote (clojure.test/is (= (quote (def x 1)) (datum->form {:expectation-type nil, :test-sexpr (quote (def x 1))} (quote rct-clr.gen) (quote test-output-ns)))))))
@@ -40,7 +40,7 @@
   ;; gen.cljc:170
   (testing "gen.cljc:170" (eval (quote (clojure.test/is (= (quote (matcho.core/assert [0 1] (range 5))) (datum->form {:expectation-type (quote =>>), :test-sexpr (quote (range 5)), :expectation-string "[0 1 ...]"} (quote rct-clr.gen) (quote test-output-ns)))))))
   ;; gen.cljc:178
-  (testing "gen.cljc:178" (eval (quote (clojure.test/is (= (quote (try (boom!) (clojure.test/is false "Expected exception") (catch Exception e (matcho.core/assert #:error{:class Exception} (test-output-ns/error->map e))))) (datum->form {:expectation-type (quote throws=>>), :test-sexpr (quote (boom!)), :expectation-string "{:error/class Exception}"} (quote rct-clr.gen) (quote test-output-ns)))))))
+  (testing "gen.cljc:178" (eval (quote (clojure.test/is (= (quote (try (boom!) (clojure.test/is false "Expected exception") (catch System.Exception e (matcho.core/assert #:error{:class Exception} (test-output-ns/error->map e))))) (datum->form {:expectation-type (quote throws=>>), :test-sexpr (quote (boom!)), :expectation-string "{:error/class Exception}"} (quote rct-clr.gen) (quote test-output-ns)))))))
   ;; gen.cljc:191
   (testing "gen.cljc:191" (eval (quote (clojure.test/is (= (quote (clojure.test/is (= :clr (get-platform)))) (datum->form {:expectation-type (quote =>), :test-sexpr (quote (get-platform)), :expectation-string "#?(:clj :jvm :cljr :clr)"} (quote rct-clr.gen) (quote test-output-ns)))))))
   ;; gen.cljc:199

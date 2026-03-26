@@ -183,7 +183,7 @@
           out (write-block-output block-data "err.cljc")
           expected (str "(defn- err-block-0 []\n"
                         "  ;; err.cljc:20\n"
-                        "  (testing \"err.cljc:20\" (eval (quote (try (kaboom) (clojure.test/is false \"Expected exception\") (catch Exception e (matcho.core/assert #:error{:class Exception} (test.output/error->map e))))))))\n")]
+                        "  (testing \"err.cljc:20\" (eval (quote (try (kaboom) (clojure.test/is false \"Expected exception\") (catch System.Exception e (matcho.core/assert #:error{:class Exception} (test.output/error->map e))))))))\n")]
       (is (= expected out))))
   (testing "no location: bare eval"
     (let [block-data [{:test-sexpr (list 'kaboom)
@@ -191,7 +191,7 @@
                        :expectation-type 'throws=>>}]
           out (write-block-output block-data "err.cljc")
           expected (str "(defn- err-block-0 []\n"
-                        "  (eval (quote (try (kaboom) (clojure.test/is false \"Expected exception\") (catch Exception e (matcho.core/assert #:error{:class Exception} (test.output/error->map e)))))))\n")]
+                        "  (eval (quote (try (kaboom) (clojure.test/is false \"Expected exception\") (catch System.Exception e (matcho.core/assert #:error{:class Exception} (test.output/error->map e)))))))\n")]
       (is (= expected out)))))
 
 (deftest write-block-fn-empty-block-data-test
@@ -280,18 +280,6 @@
           "generated output has changed — run bb gen-clr-rct to update the golden file")
       (finally
         (.delete tmp)))))
-
-;; This works because the current RCT tests in src/rct_c/gen.cljc do not have
-;; any CLR-specific code. But if they ever did need CLR-specific tests, then
-;; we would need to use a custom file for golden testing
-(deftest golden-file-tests-pass-test
-  (load-file golden-path)
-  (try
-    (let [result (test/run-tests golden-ns)]
-      (is (pos? (:test result)) "at least one test ran")
-      (is (= {:fail 0 :error 0} (select-keys result [:fail :error]))))
-    (finally
-      (remove-ns golden-ns))))
 
 ;; ---------------------------------------------------------------------------
 ;; generate

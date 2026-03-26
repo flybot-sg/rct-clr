@@ -136,7 +136,7 @@
                 (read-expectation datum ns-sym) test-sexpr)
       throws=>> (list 'try test-sexpr
                       (list 'clojure.test/is false "Expected exception")
-                      (list 'catch 'Exception 'e
+                      (list 'catch 'System.Exception 'e
                             (list 'matcho.core/assert
                                   (read-expectation datum ns-sym)
                                   (list error->map-sym 'e)))))))
@@ -183,7 +183,7 @@
   ;=>
   '(try (boom!)
         (clojure.test/is false "Expected exception")
-        (catch Exception e
+        (catch System.Exception e
           (matcho.core/assert {:error/class Exception}
                               (test-output-ns/error->map e))))
 
