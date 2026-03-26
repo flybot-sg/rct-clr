@@ -11,65 +11,81 @@
 
 ;; rct-clr.gen
 (defn- rct-clr-gen-rct-block-0 []
-  ;; gen.cljc:40
-  (testing "gen.cljc:40" (eval (quote (clojure.test/is (= {:io (quote clojure.java.io), :tr (quote clojure.tools.reader), :ns-file (quote clojure.tools.namespace.file), :string (quote clojure.string), :z (quote rewrite-clj.zip), :ns-parse (quote clojure.tools.namespace.parse), :rct (quote com.mjdowney.rich-comment-tests), :current (quote rct-clr.gen), :emit (quote com.mjdowney.rich-comment-tests.emit-tests), :cli (quote clojure.tools.cli)} (build-resolver (quote rct-clr.gen))))))))
+  ;; gen.cljc:41
+  (testing "gen.cljc:41" (eval (quote (clojure.test/is (= {:io (quote clojure.java.io), :walk (quote clojure.walk), :tr (quote clojure.tools.reader), :ns-file (quote clojure.tools.namespace.file), :string (quote clojure.string), :z (quote rewrite-clj.zip), :ns-parse (quote clojure.tools.namespace.parse), :rct (quote com.mjdowney.rich-comment-tests), :current (quote rct-clr.gen), :emit (quote com.mjdowney.rich-comment-tests.emit-tests), :cli (quote clojure.tools.cli)} (build-resolver (quote rct-clr.gen))))))))
 (defn- rct-clr-gen-rct-block-1 []
-  ;; gen.cljc:80
-  (testing "gen.cljc:80" (eval (quote (clojure.test/is (= 42 (read-expectation {:expectation-type (quote =>), :expectation-string "42"} (quote rct-clr.gen)))))))
-  ;; gen.cljc:85
-  (testing "gen.cljc:85" (eval (quote (clojure.test/is (= [1 2] (read-expectation {:expectation-type (quote =>>), :expectation-string "[1 2 ...]"} (quote rct-clr.gen)))))))
-  ;; gen.cljc:90
-  (testing "gen.cljc:90" (eval (quote (clojure.test/is (= nil (read-expectation {:expectation-type (quote =>), :expectation-string nil} (quote rct-clr.gen)))))))
-  ;; gen.cljc:96
-  (testing "gen.cljc:96" (eval (quote (clojure.test/is (= :clr (read-expectation {:expectation-type (quote =>), :expectation-string "#?(:clj :jvm :cljr :clr)"} (quote rct-clr.gen)))))))
-  ;; gen.cljc:102
-  (testing "gen.cljc:102" (eval (quote (clojure.test/is (= :rct-clr.gen/foo (read-expectation {:expectation-type (quote =>), :expectation-string "::foo"} (quote rct-clr.gen)))))))
-  ;; gen.cljc:108
-  (testing "gen.cljc:108" (eval (quote (clojure.test/is (= :clojure.string/join (read-expectation {:expectation-type (quote =>), :expectation-string "::string/join"} (quote rct-clr.gen)))))))
-  ;; gen.cljc:114
-  (testing "gen.cljc:114" (eval (quote (clojure.test/is (= 3 (count (read-expectation {:expectation-type (quote =>), :expectation-string "[1 2 ...]"} (quote rct-clr.gen))))))))
-  ;; gen.cljc:120
-  (testing "gen.cljc:120" (eval (quote (try (read-expectation {:expectation-type (quote =>), :expectation-string "[1 2"} (quote rct-clr.gen)) (clojure.test/is false "Expected exception") (catch System.Exception e (matcho.core/assert {} (rct-clr.rct-generated-test/error->map e))))))))
+  ;; gen.cljc:81
+  (testing "gen.cljc:81" (eval (quote (clojure.test/is (= (quote (.Message e)) (resolve-reader-conditionals (quote (.Message e)) (quote rct-clr.gen)))))))
+  ;; gen.cljc:87
+  (testing "gen.cljc:87" (eval (quote (clojure.test/is (= (quote (try (foo) (catch System.Exception e (.Message e)))) (resolve-reader-conditionals (quote (try (foo) (catch System.Exception e (.Message e)))) (quote rct-clr.gen)))))))
+  ;; gen.cljc:97
+  (testing "gen.cljc:97" (eval (quote (clojure.test/is (= (quote (+ 1 2)) (resolve-reader-conditionals (quote (+ 1 2)) (quote rct-clr.gen)))))))
+  ;; gen.cljc:101
+  (testing "gen.cljc:101" (eval (quote (clojure.test/is (= (quote (read-string "[1 2 3]")) (resolve-reader-conditionals (quote (read-string "[1 2 3]")) (quote rct-clr.gen)))))))
+  ;; gen.cljc:105
+  (testing "gen.cljc:105" (eval (quote (clojure.test/is (= nil (resolve-reader-conditionals (quote nil) (quote rct-clr.gen)))))))
+  ;; gen.cljc:111
+  (testing "gen.cljc:111" (eval (quote (clojure.test/is (= :fallback (resolve-reader-conditionals (quote :fallback) (quote rct-clr.gen)))))))
+  ;; gen.cljc:117
+  (testing "gen.cljc:117" (eval (quote (clojure.test/is (= (quote (do nil :ok)) (resolve-reader-conditionals (quote (do nil :ok)) (quote rct-clr.gen))))))))
 (defn- rct-clr-gen-rct-block-2 []
-  ;; gen.cljc:147
-  (testing "gen.cljc:147" (eval (quote (clojure.test/is (= (quote (def x 1)) (datum->form {:expectation-type nil, :test-sexpr (quote (def x 1))} (quote rct-clr.gen) (quote test-output-ns)))))))
-  ;; gen.cljc:154
-  (testing "gen.cljc:154" (eval (quote (clojure.test/is (= (quote (clojure.test/is (= 3 (+ 1 2)))) (datum->form {:expectation-type (quote =>), :test-sexpr (quote (+ 1 2)), :expectation-string "3"} (quote rct-clr.gen) (quote test-output-ns)))))))
-  ;; gen.cljc:162
-  (testing "gen.cljc:162" (eval (quote (clojure.test/is (= (quote (matcho.core/assert {:status 200} (get-status))) (datum->form {:expectation-type (quote =>>), :test-sexpr (quote (get-status)), :expectation-string "{:status 200}"} (quote rct-clr.gen) (quote test-output-ns)))))))
-  ;; gen.cljc:170
-  (testing "gen.cljc:170" (eval (quote (clojure.test/is (= (quote (matcho.core/assert [0 1] (range 5))) (datum->form {:expectation-type (quote =>>), :test-sexpr (quote (range 5)), :expectation-string "[0 1 ...]"} (quote rct-clr.gen) (quote test-output-ns)))))))
-  ;; gen.cljc:178
-  (testing "gen.cljc:178" (eval (quote (clojure.test/is (= (quote (try (boom!) (clojure.test/is false "Expected exception") (catch System.Exception e (matcho.core/assert #:error{:class Exception} (test-output-ns/error->map e))))) (datum->form {:expectation-type (quote throws=>>), :test-sexpr (quote (boom!)), :expectation-string "{:error/class Exception}"} (quote rct-clr.gen) (quote test-output-ns)))))))
-  ;; gen.cljc:191
-  (testing "gen.cljc:191" (eval (quote (clojure.test/is (= (quote (clojure.test/is (= :clr (get-platform)))) (datum->form {:expectation-type (quote =>), :test-sexpr (quote (get-platform)), :expectation-string "#?(:clj :jvm :cljr :clr)"} (quote rct-clr.gen) (quote test-output-ns)))))))
-  ;; gen.cljc:199
-  (testing "gen.cljc:199" (eval (quote (clojure.test/is (= (quote (clojure.test/is (= :rct-clr.gen/foo (get-type)))) (datum->form {:expectation-type (quote =>), :test-sexpr (quote (get-type)), :expectation-string "::foo"} (quote rct-clr.gen) (quote test-output-ns))))))))
+  ;; gen.cljc:153
+  (testing "gen.cljc:153" (eval (quote (clojure.test/is (= 42 (read-expectation {:expectation-type (quote =>), :expectation-string "42"} (quote rct-clr.gen)))))))
+  ;; gen.cljc:158
+  (testing "gen.cljc:158" (eval (quote (clojure.test/is (= [1 2] (read-expectation {:expectation-type (quote =>>), :expectation-string "[1 2 ...]"} (quote rct-clr.gen)))))))
+  ;; gen.cljc:163
+  (testing "gen.cljc:163" (eval (quote (clojure.test/is (= nil (read-expectation {:expectation-type (quote =>), :expectation-string nil} (quote rct-clr.gen)))))))
+  ;; gen.cljc:169
+  (testing "gen.cljc:169" (eval (quote (clojure.test/is (= :clr (read-expectation {:expectation-type (quote =>), :expectation-string "#?(:clj :jvm :cljr :clr)"} (quote rct-clr.gen)))))))
+  ;; gen.cljc:175
+  (testing "gen.cljc:175" (eval (quote (clojure.test/is (= :rct-clr.gen/foo (read-expectation {:expectation-type (quote =>), :expectation-string "::foo"} (quote rct-clr.gen)))))))
+  ;; gen.cljc:181
+  (testing "gen.cljc:181" (eval (quote (clojure.test/is (= :clojure.string/join (read-expectation {:expectation-type (quote =>), :expectation-string "::string/join"} (quote rct-clr.gen)))))))
+  ;; gen.cljc:187
+  (testing "gen.cljc:187" (eval (quote (clojure.test/is (= 3 (count (read-expectation {:expectation-type (quote =>), :expectation-string "[1 2 ...]"} (quote rct-clr.gen))))))))
+  ;; gen.cljc:193
+  (testing "gen.cljc:193" (eval (quote (try (read-expectation {:expectation-type (quote =>), :expectation-string "[1 2"} (quote rct-clr.gen)) (clojure.test/is false "Expected exception") (catch System.Exception e (matcho.core/assert {} (rct-clr.rct-generated-test/error->map e))))))))
 (defn- rct-clr-gen-rct-block-3 []
-  ;; gen.cljc:214
-  (testing "gen.cljc:214" (eval (quote (clojure.test/is (= "my-cool-namespace" (ns-sym->test-base (quote my.cool.namespace)))))))
-  ;; gen.cljc:217
-  (testing "gen.cljc:217" (eval (quote (clojure.test/is (= "single" (ns-sym->test-base (quote single))))))))
+  ;; gen.cljc:220
+  (testing "gen.cljc:220" (eval (quote (clojure.test/is (= (quote (def x 1)) (datum->form {:expectation-type nil, :test-sexpr (quote (def x 1))} (quote rct-clr.gen) (quote test-output-ns)))))))
+  ;; gen.cljc:227
+  (testing "gen.cljc:227" (eval (quote (clojure.test/is (= (quote (clojure.test/is (= 3 (+ 1 2)))) (datum->form {:expectation-type (quote =>), :test-sexpr (quote (+ 1 2)), :expectation-string "3"} (quote rct-clr.gen) (quote test-output-ns)))))))
+  ;; gen.cljc:235
+  (testing "gen.cljc:235" (eval (quote (clojure.test/is (= (quote (matcho.core/assert {:status 200} (get-status))) (datum->form {:expectation-type (quote =>>), :test-sexpr (quote (get-status)), :expectation-string "{:status 200}"} (quote rct-clr.gen) (quote test-output-ns)))))))
+  ;; gen.cljc:243
+  (testing "gen.cljc:243" (eval (quote (clojure.test/is (= (quote (matcho.core/assert [0 1] (range 5))) (datum->form {:expectation-type (quote =>>), :test-sexpr (quote (range 5)), :expectation-string "[0 1 ...]"} (quote rct-clr.gen) (quote test-output-ns)))))))
+  ;; gen.cljc:251
+  (testing "gen.cljc:251" (eval (quote (clojure.test/is (= (quote (try (boom!) (clojure.test/is false "Expected exception") (catch System.Exception e (matcho.core/assert #:error{:class Exception} (test-output-ns/error->map e))))) (datum->form {:expectation-type (quote throws=>>), :test-sexpr (quote (boom!)), :expectation-string "{:error/class Exception}"} (quote rct-clr.gen) (quote test-output-ns)))))))
+  ;; gen.cljc:264
+  (testing "gen.cljc:264" (eval (quote (clojure.test/is (= (quote (clojure.test/is (= :clr (get-platform)))) (datum->form {:expectation-type (quote =>), :test-sexpr (quote (get-platform)), :expectation-string "#?(:clj :jvm :cljr :clr)"} (quote rct-clr.gen) (quote test-output-ns)))))))
+  ;; gen.cljc:272
+  (testing "gen.cljc:272" (eval (quote (clojure.test/is (= (quote (clojure.test/is (= :rct-clr.gen/foo (get-type)))) (datum->form {:expectation-type (quote =>), :test-sexpr (quote (get-type)), :expectation-string "::foo"} (quote rct-clr.gen) (quote test-output-ns))))))))
 (defn- rct-clr-gen-rct-block-4 []
-  ;; gen.cljc:316
-  (testing "gen.cljc:316" (eval (quote (clojure.test/is (= {:ok {:src-dirs ["src"], :output "out.cljc", :namespace "my.ns"}} (validate-opts ["-o" "out.cljc" "-n" "my.ns"]))))))
-  ;; gen.cljc:320
-  (testing "gen.cljc:320" (eval (quote (clojure.test/is (= {:ok {:src-dirs ["src1" "src2"], :output "out.cljc", :namespace "my.ns"}} (validate-opts ["-s" "src1" "-s" "src2" "-o" "out.cljc" "-n" "my.ns"]))))))
-  ;; gen.cljc:324
-  (testing "gen.cljc:324" (eval (quote (clojure.test/is (= {:errors ["Must provide --output / -o"]} (validate-opts ["-n" "my.ns"]))))))
-  ;; gen.cljc:328
-  (testing "gen.cljc:328" (eval (quote (clojure.test/is (= {:errors ["Must provide --namespace / -n"]} (validate-opts ["-o" "out.cljc"]))))))
-  ;; gen.cljc:332
-  (testing "gen.cljc:332" (eval (quote (clojure.test/is (= {:errors ["Must provide --output / -o" "Must provide --namespace / -n"]} (validate-opts []))))))
-  ;; gen.cljc:336
-  (testing "gen.cljc:336" (eval (quote (clojure.test/is (= true (contains? (validate-opts ["--bogus"]) :errors))))))
-  ;; gen.cljc:339
-  (testing "gen.cljc:339" (eval (quote (clojure.test/is (= true (contains? (validate-opts ["-h"]) :help)))))))
+  ;; gen.cljc:287
+  (testing "gen.cljc:287" (eval (quote (clojure.test/is (= "my-cool-namespace" (ns-sym->test-base (quote my.cool.namespace)))))))
+  ;; gen.cljc:290
+  (testing "gen.cljc:290" (eval (quote (clojure.test/is (= "single" (ns-sym->test-base (quote single))))))))
+(defn- rct-clr-gen-rct-block-5 []
+  ;; gen.cljc:389
+  (testing "gen.cljc:389" (eval (quote (clojure.test/is (= {:ok {:src-dirs ["src"], :output "out.cljc", :namespace "my.ns"}} (validate-opts ["-o" "out.cljc" "-n" "my.ns"]))))))
+  ;; gen.cljc:393
+  (testing "gen.cljc:393" (eval (quote (clojure.test/is (= {:ok {:src-dirs ["src1" "src2"], :output "out.cljc", :namespace "my.ns"}} (validate-opts ["-s" "src1" "-s" "src2" "-o" "out.cljc" "-n" "my.ns"]))))))
+  ;; gen.cljc:397
+  (testing "gen.cljc:397" (eval (quote (clojure.test/is (= {:errors ["Must provide --output / -o"]} (validate-opts ["-n" "my.ns"]))))))
+  ;; gen.cljc:401
+  (testing "gen.cljc:401" (eval (quote (clojure.test/is (= {:errors ["Must provide --namespace / -n"]} (validate-opts ["-o" "out.cljc"]))))))
+  ;; gen.cljc:405
+  (testing "gen.cljc:405" (eval (quote (clojure.test/is (= {:errors ["Must provide --output / -o" "Must provide --namespace / -n"]} (validate-opts []))))))
+  ;; gen.cljc:409
+  (testing "gen.cljc:409" (eval (quote (clojure.test/is (= true (contains? (validate-opts ["--bogus"]) :errors))))))
+  ;; gen.cljc:412
+  (testing "gen.cljc:412" (eval (quote (clojure.test/is (= true (contains? (validate-opts ["-h"]) :help)))))))
 (deftest rct-clr-gen-rct
   (binding [*ns* (the-ns 'rct-clr.gen)]
     (rct-clr-gen-rct-block-0)
     (rct-clr-gen-rct-block-1)
     (rct-clr-gen-rct-block-2)
     (rct-clr-gen-rct-block-3)
-    (rct-clr-gen-rct-block-4)))
+    (rct-clr-gen-rct-block-4)
+    (rct-clr-gen-rct-block-5)))
 

@@ -9,6 +9,7 @@
             [com.mjdowney.rich-comment-tests :as rct]
             [com.mjdowney.rich-comment-tests.emit-tests :as emit]
             [clojure.tools.reader :as tr]
+            [clojure.walk :as walk]
             [rewrite-clj.zip :as z]))
 
 (defn find-cljc-files
@@ -48,7 +49,76 @@
    :rct 'com.mjdowney.rich-comment-tests
    :string 'clojure.string
    :tr 'clojure.tools.reader
+   :walk 'clojure.walk
    :z 'rewrite-clj.zip})
+
+(defn resolve-reader-conditionals
+  "Post-process a form from z/sexpr to resolve reader conditionals for CLR.
+  rewrite-clj wraps unresolved #? forms as (read-string \"#?(...)\") — this
+  walks the tree and resolves them with :features #{:cljr}."
+  [form ns-sym]
+  (let [target-ns (the-ns ns-sym)]
+    (walk/postwalk
+     (fn [x]
+       (if (and (list? x)
+                (= 'read-string (first x))
+                (string? (second x))
+                (string/starts-with? (second x) "#?"))
+         ;; Parse with :preserve to inspect branch keys first — tools.reader
+         ;; throws EOF when no branch matches (e.g. #?(:clj ...)) with #{:cljr},
+         ;; so CLJ-only conditionals must be detected and dropped to nil.
+         (let [rc (tr/read-string {:read-cond :preserve} (second x))
+               branch-keys (set (take-nth 2 (.form rc)))]
+           (when (or (branch-keys :cljr) (branch-keys :default))
+             (binding [*ns* target-ns]
+               (tr/read-string {:read-cond :allow :features #{:cljr}} (second x)))))
+         x))
+     form)))
+
+^:rct/test
+(comment
+  ;; resolves reader conditional to :cljr branch
+  (resolve-reader-conditionals
+   '(read-string "#?(:clj (.getMessage e) :cljr (.Message e))")
+   'rct-clr.gen)
+  ;=> '(.Message e)
+
+  ;; resolves nested reader conditionals inside a larger form
+  (resolve-reader-conditionals
+   '(try (foo)
+         (catch (read-string "#?(:clj Exception :cljr System.Exception)") e
+           (read-string "#?(:clj (.getMessage e) :cljr (.Message e))")))
+   'rct-clr.gen)
+  ;=> '(try (foo)
+  ;;        (catch System.Exception e
+  ;;          (.Message e)))
+
+  ;; passes through forms without reader conditionals unchanged
+  (resolve-reader-conditionals '(+ 1 2) 'rct-clr.gen)
+  ;=> '(+ 1 2)
+
+  ;; doesn't touch non-reader-conditional read-string calls
+  (resolve-reader-conditionals '(read-string "[1 2 3]") 'rct-clr.gen)
+  ;=> '(read-string "[1 2 3]")
+
+  ;; CLJ-only conditional (no :cljr branch) resolves to nil
+  (resolve-reader-conditionals
+   '(read-string "#?(:clj :jvm-only)")
+   'rct-clr.gen)
+  ;=> nil
+
+  ;; :default branch used when no :cljr branch present
+  (resolve-reader-conditionals
+   '(read-string "#?(:clj :jvm :default :fallback)")
+   'rct-clr.gen)
+  ;=> :fallback
+
+  ;; CLJ-only nested inside a larger form — node becomes nil, rest preserved
+  (resolve-reader-conditionals
+   '(do (read-string "#?(:clj :jvm-only)") :ok)
+   'rct-clr.gen)
+  ;=> '(do nil :ok)
+  )
 
 (defn file->rct-blocks
   "Extract RCT test data from a file, grouped by ^:rct/test block.
@@ -60,6 +130,9 @@
                               :auto-resolve resolver})]
     (->> (rct/rct-zlocs zloc)
          (map rct/rct-data-seq)
+         (map (fn [block]
+                (map #(update % :test-sexpr resolve-reader-conditionals ns-sym)
+                     block)))
          (filter seq))))
 
 (defn read-expectation
