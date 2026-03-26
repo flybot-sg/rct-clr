@@ -11,29 +11,21 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/parth-io/clj-cljr-build:1.1.0
-    env:
-      GITLIBS: .gitlibs
     steps:
       - uses: actions/checkout@v6
 
       - uses: actions/cache@v5
         with:
           path: |
-            .m2/
-            .gitlibs/
-            .cpcache/
+            ~/.m2/repository
+            ~/.gitlibs
+            ~/.cpcache
           key: ${{ runner.os }}-deps-${{ hashFiles('deps.edn') }}
           restore-keys: |
             ${{ runner.os }}-deps-
-
-      - name: Remove generated test file
-        run: rm -f test/rct_clr/rct_generated_test.cljc
 
       - name: Format check
         run: bb fmt-check
 
       - name: Run JVM tests
-        run: clojure -Sdeps '{:mvn/local-repo ".m2/repository"}' -M:dev:test
-
-      - name: Run CLR tests
-        run: bb clr-test
+        run: bb test

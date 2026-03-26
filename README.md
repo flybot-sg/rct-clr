@@ -9,10 +9,12 @@ RCT depends on rewrite-clj and tools.namespace, which are JVM-only. This tool pr
 1. **Extract (JVM):** Run `rct-clr.gen` on the JVM, where rewrite-clj and tools.namespace are available. It scans `.cljc` source files, loads each namespace, finds all `^:rct/test` comment blocks, and writes the assertions into a plain `.cljc` test file. (`.clj` files are ignored.)
 2. **Test (CLR):** Run the generated file on Magic/Nostrand using `clojure.test`. No JVM-only dependencies are needed at test time.
 
+`rct-clr` itself is a JVM-only tool and runs on the JVM to generate test files.
+
 ## Prerequisites
 
 - JVM Clojure (for running the generator)
-- [Magic](https://github.com/nasser/magic)/[Nostrand](https://github.com/nasser/nostrand) (for running generated tests on CLR)
+- [Magic](https://github.com/nasser/magic)/[Nostrand](https://github.com/nasser/nostrand) on the target CLR platform (for running generated tests)
 
 ## Usage
 

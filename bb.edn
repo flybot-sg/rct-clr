@@ -19,9 +19,4 @@
          test
          {:doc  "Run all tests"
           :task (do (run 'gen-clr-rct)
-                    (clojure (apply str "-M:dev:test " (interpose " " *command-line-args*))))}
-         clr-test
-         {:doc  "Regenerate RCT tests, clear deps cache, and run CLR tests"
-          :task (do (run 'gen-clr-rct)
-                    (shell "rm -rf deps build")
-                    (shell "nos" "dotnet/run-tests"))}}}
+                    (clojure (apply str "-M:dev:test " (interpose " " *command-line-args*))))}}}

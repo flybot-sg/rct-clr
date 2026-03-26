@@ -25,9 +25,6 @@ bb rct
 # Generate CLR-compatible test file from ^:rct/test blocks
 bb gen-clr-rct
 
-# Full CLR pipeline: generate tests, clear cache, run CLR tests
-bb clr-test
-
 # Format check / fix
 bb fmt-check
 bb fmt-fix
@@ -87,8 +84,3 @@ Generated tests use `eval` with `*ns*` binding for namespace isolation. The gene
 - Are similar patterns handled consistently?
 - Are docs up to date with changed behavior?
 
-## CLR / Nostrand
-
-- `project.edn` — CLR deps (matcho on the `magic` branch)
-- `dotnet.clj` — CLR build/test orchestration (called via `nos dotnet/build`, `nos dotnet/run-tests`)
-- Magic compilation flags: `*strongly-typed-invokes*`, `*direct-linking*` enabled; `*elide-meta*` disabled
