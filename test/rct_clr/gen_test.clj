@@ -121,8 +121,7 @@
 (deftest write-deftest-empty-blocks-test
   (let [sw (java.io.StringWriter.)
         expected (str "(deftest some-ns-rct\n"
-                      "  (binding [*ns* (the-ns 'some.ns)]\n"
-                      "))\n\n")]
+                      "  (binding [*ns* (the-ns 'some.ns)]))\n\n")]
     (gen/write-deftest sw 'some.ns [])
     (is (= expected (str sw)))))
 
@@ -144,8 +143,7 @@
                         "  ;; example.cljc:10\n"
                         "  (testing \"example.cljc:10\" (eval (quote (clojure.test/is (= 3 (+ 1 2))))))\n"
                         "  ;; example.cljc:12\n"
-                        "  (eval (quote (def x 1)))\n"
-                        ")\n")]
+                        "  (eval (quote (def x 1))))\n")]
       (is (= expected out))))
   (testing "no location: bare eval, no testing wrapper"
     (let [block-data [{:test-sexpr (list '+ 1 2)
@@ -153,8 +151,7 @@
                        :expectation-type '=>}]
           out (write-block-output block-data)
           expected (str "(defn- example-block-0 []\n"
-                        "  (eval (quote (clojure.test/is (= 3 (+ 1 2)))))\n"
-                        ")\n")]
+                        "  (eval (quote (clojure.test/is (= 3 (+ 1 2))))))\n")]
       (is (= expected out)))))
 
 (deftest write-block-fn-matcho-test
@@ -166,8 +163,7 @@
           out (write-block-output block-data "api.cljc")
           expected (str "(defn- api-block-0 []\n"
                         "  ;; api.cljc:5\n"
-                        "  (testing \"api.cljc:5\" (eval (quote (matcho.core/assert {:status 200} (get-status)))))\n"
-                        ")\n")]
+                        "  (testing \"api.cljc:5\" (eval (quote (matcho.core/assert {:status 200} (get-status))))))\n")]
       (is (= expected out))))
   (testing "no location: bare eval"
     (let [block-data [{:test-sexpr (list 'get-status)
@@ -175,8 +171,7 @@
                        :expectation-type '=>>}]
           out (write-block-output block-data "api.cljc")
           expected (str "(defn- api-block-0 []\n"
-                        "  (eval (quote (matcho.core/assert {:status 200} (get-status))))\n"
-                        ")\n")]
+                        "  (eval (quote (matcho.core/assert {:status 200} (get-status)))))\n")]
       (is (= expected out)))))
 
 (deftest write-block-fn-throws-test
@@ -188,8 +183,7 @@
           out (write-block-output block-data "err.cljc")
           expected (str "(defn- err-block-0 []\n"
                         "  ;; err.cljc:20\n"
-                        "  (testing \"err.cljc:20\" (eval (quote (try (kaboom) (clojure.test/is false \"Expected exception\") (catch Exception e (matcho.core/assert #:error{:class Exception} (test.output/error->map e)))))))\n"
-                        ")\n")]
+                        "  (testing \"err.cljc:20\" (eval (quote (try (kaboom) (clojure.test/is false \"Expected exception\") (catch Exception e (matcho.core/assert #:error{:class Exception} (test.output/error->map e))))))))\n")]
       (is (= expected out))))
   (testing "no location: bare eval"
     (let [block-data [{:test-sexpr (list 'kaboom)
@@ -197,14 +191,12 @@
                        :expectation-type 'throws=>>}]
           out (write-block-output block-data "err.cljc")
           expected (str "(defn- err-block-0 []\n"
-                        "  (eval (quote (try (kaboom) (clojure.test/is false \"Expected exception\") (catch Exception e (matcho.core/assert #:error{:class Exception} (test.output/error->map e))))))\n"
-                        ")\n")]
+                        "  (eval (quote (try (kaboom) (clojure.test/is false \"Expected exception\") (catch Exception e (matcho.core/assert #:error{:class Exception} (test.output/error->map e)))))))\n")]
       (is (= expected out)))))
 
 (deftest write-block-fn-empty-block-data-test
   (let [out (write-block-output [])
-        expected (str "(defn- example-block-0 []\n"
-                      ")\n")]
+        expected "(defn- example-block-0 [])\n"]
     (is (= expected out))))
 
 (deftest write-block-fn-metadata-preservation-test
@@ -215,8 +207,7 @@
         out (write-block-output block-data "meta.cljc")
         expected (str "(defn- meta-block-0 []\n"
                       "  ;; meta.cljc:5\n"
-                      "  (testing \"meta.cljc:5\" (eval (quote (matcho.core/assert ^#:matcho{:strict true} [1 2 3] (get-items)))))\n"
-                      ")\n")]
+                      "  (testing \"meta.cljc:5\" (eval (quote (matcho.core/assert ^#:matcho{:strict true} [1 2 3] (get-items))))))\n")]
     (is (= expected out))))
 
 ;; ---------------------------------------------------------------------------

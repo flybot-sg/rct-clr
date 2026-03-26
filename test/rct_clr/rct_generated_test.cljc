@@ -12,8 +12,7 @@
 ;; rct-clr.gen
 (defn- rct-clr-gen-rct-block-0 []
   ;; gen.cljc:40
-  (testing "gen.cljc:40" (eval (quote (clojure.test/is (= {:io (quote clojure.java.io), :tr (quote clojure.tools.reader), :ns-file (quote clojure.tools.namespace.file), :string (quote clojure.string), :z (quote rewrite-clj.zip), :ns-parse (quote clojure.tools.namespace.parse), :rct (quote com.mjdowney.rich-comment-tests), :current (quote rct-clr.gen), :emit (quote com.mjdowney.rich-comment-tests.emit-tests), :cli (quote clojure.tools.cli)} (build-resolver (quote rct-clr.gen)))))))
-)
+  (testing "gen.cljc:40" (eval (quote (clojure.test/is (= {:io (quote clojure.java.io), :tr (quote clojure.tools.reader), :ns-file (quote clojure.tools.namespace.file), :string (quote clojure.string), :z (quote rewrite-clj.zip), :ns-parse (quote clojure.tools.namespace.parse), :rct (quote com.mjdowney.rich-comment-tests), :current (quote rct-clr.gen), :emit (quote com.mjdowney.rich-comment-tests.emit-tests), :cli (quote clojure.tools.cli)} (build-resolver (quote rct-clr.gen))))))))
 (defn- rct-clr-gen-rct-block-1 []
   ;; gen.cljc:80
   (testing "gen.cljc:80" (eval (quote (clojure.test/is (= 42 (read-expectation {:expectation-type (quote =>), :expectation-string "42"} (quote rct-clr.gen)))))))
@@ -30,8 +29,7 @@
   ;; gen.cljc:114
   (testing "gen.cljc:114" (eval (quote (clojure.test/is (= 3 (count (read-expectation {:expectation-type (quote =>), :expectation-string "[1 2 ...]"} (quote rct-clr.gen))))))))
   ;; gen.cljc:120
-  (testing "gen.cljc:120" (eval (quote (try (read-expectation {:expectation-type (quote =>), :expectation-string "[1 2"} (quote rct-clr.gen)) (clojure.test/is false "Expected exception") (catch Exception e (matcho.core/assert {} (rct-clr.rct-generated-test/error->map e)))))))
-)
+  (testing "gen.cljc:120" (eval (quote (try (read-expectation {:expectation-type (quote =>), :expectation-string "[1 2"} (quote rct-clr.gen)) (clojure.test/is false "Expected exception") (catch Exception e (matcho.core/assert {} (rct-clr.rct-generated-test/error->map e))))))))
 (defn- rct-clr-gen-rct-block-2 []
   ;; gen.cljc:147
   (testing "gen.cljc:147" (eval (quote (clojure.test/is (= (quote (def x 1)) (datum->form {:expectation-type nil, :test-sexpr (quote (def x 1))} (quote rct-clr.gen) (quote test-output-ns)))))))
@@ -46,36 +44,32 @@
   ;; gen.cljc:191
   (testing "gen.cljc:191" (eval (quote (clojure.test/is (= (quote (clojure.test/is (= :clr (get-platform)))) (datum->form {:expectation-type (quote =>), :test-sexpr (quote (get-platform)), :expectation-string "#?(:clj :jvm :cljr :clr)"} (quote rct-clr.gen) (quote test-output-ns)))))))
   ;; gen.cljc:199
-  (testing "gen.cljc:199" (eval (quote (clojure.test/is (= (quote (clojure.test/is (= :rct-clr.gen/foo (get-type)))) (datum->form {:expectation-type (quote =>), :test-sexpr (quote (get-type)), :expectation-string "::foo"} (quote rct-clr.gen) (quote test-output-ns)))))))
-)
+  (testing "gen.cljc:199" (eval (quote (clojure.test/is (= (quote (clojure.test/is (= :rct-clr.gen/foo (get-type)))) (datum->form {:expectation-type (quote =>), :test-sexpr (quote (get-type)), :expectation-string "::foo"} (quote rct-clr.gen) (quote test-output-ns))))))))
 (defn- rct-clr-gen-rct-block-3 []
   ;; gen.cljc:214
   (testing "gen.cljc:214" (eval (quote (clojure.test/is (= "my-cool-namespace" (ns-sym->test-base (quote my.cool.namespace)))))))
   ;; gen.cljc:217
-  (testing "gen.cljc:217" (eval (quote (clojure.test/is (= "single" (ns-sym->test-base (quote single)))))))
-)
+  (testing "gen.cljc:217" (eval (quote (clojure.test/is (= "single" (ns-sym->test-base (quote single))))))))
 (defn- rct-clr-gen-rct-block-4 []
-  ;; gen.cljc:308
-  (testing "gen.cljc:308" (eval (quote (clojure.test/is (= {:ok {:src-dirs ["src"], :output "out.cljc", :namespace "my.ns"}} (validate-opts ["-o" "out.cljc" "-n" "my.ns"]))))))
-  ;; gen.cljc:312
-  (testing "gen.cljc:312" (eval (quote (clojure.test/is (= {:ok {:src-dirs ["src1" "src2"], :output "out.cljc", :namespace "my.ns"}} (validate-opts ["-s" "src1" "-s" "src2" "-o" "out.cljc" "-n" "my.ns"]))))))
   ;; gen.cljc:316
-  (testing "gen.cljc:316" (eval (quote (clojure.test/is (= {:errors ["Must provide --output / -o"]} (validate-opts ["-n" "my.ns"]))))))
+  (testing "gen.cljc:316" (eval (quote (clojure.test/is (= {:ok {:src-dirs ["src"], :output "out.cljc", :namespace "my.ns"}} (validate-opts ["-o" "out.cljc" "-n" "my.ns"]))))))
   ;; gen.cljc:320
-  (testing "gen.cljc:320" (eval (quote (clojure.test/is (= {:errors ["Must provide --namespace / -n"]} (validate-opts ["-o" "out.cljc"]))))))
+  (testing "gen.cljc:320" (eval (quote (clojure.test/is (= {:ok {:src-dirs ["src1" "src2"], :output "out.cljc", :namespace "my.ns"}} (validate-opts ["-s" "src1" "-s" "src2" "-o" "out.cljc" "-n" "my.ns"]))))))
   ;; gen.cljc:324
-  (testing "gen.cljc:324" (eval (quote (clojure.test/is (= {:errors ["Must provide --output / -o" "Must provide --namespace / -n"]} (validate-opts []))))))
+  (testing "gen.cljc:324" (eval (quote (clojure.test/is (= {:errors ["Must provide --output / -o"]} (validate-opts ["-n" "my.ns"]))))))
   ;; gen.cljc:328
-  (testing "gen.cljc:328" (eval (quote (clojure.test/is (= true (contains? (validate-opts ["--bogus"]) :errors))))))
-  ;; gen.cljc:331
-  (testing "gen.cljc:331" (eval (quote (clojure.test/is (= true (contains? (validate-opts ["-h"]) :help))))))
-)
+  (testing "gen.cljc:328" (eval (quote (clojure.test/is (= {:errors ["Must provide --namespace / -n"]} (validate-opts ["-o" "out.cljc"]))))))
+  ;; gen.cljc:332
+  (testing "gen.cljc:332" (eval (quote (clojure.test/is (= {:errors ["Must provide --output / -o" "Must provide --namespace / -n"]} (validate-opts []))))))
+  ;; gen.cljc:336
+  (testing "gen.cljc:336" (eval (quote (clojure.test/is (= true (contains? (validate-opts ["--bogus"]) :errors))))))
+  ;; gen.cljc:339
+  (testing "gen.cljc:339" (eval (quote (clojure.test/is (= true (contains? (validate-opts ["-h"]) :help)))))))
 (deftest rct-clr-gen-rct
   (binding [*ns* (the-ns 'rct-clr.gen)]
     (rct-clr-gen-rct-block-0)
     (rct-clr-gen-rct-block-1)
     (rct-clr-gen-rct-block-2)
     (rct-clr-gen-rct-block-3)
-    (rct-clr-gen-rct-block-4)
-))
+    (rct-clr-gen-rct-block-4)))
 

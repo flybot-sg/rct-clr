@@ -223,33 +223,41 @@
   Each form is wrapped in (eval (quote ...)) so it resolves in the source
   namespace at test time, not the generated test namespace."
   [w fn-sym block-data ns-sym file output-ns]
-  (let [file-name (.getName file)]
-    (.write w (str "(defn- " fn-sym " []\n"))
+  (let [file-name (.getName file)
+        body (java.io.StringWriter.)]
     ;; prn, not pprint — pprint drops metadata (e.g. ^:matcho/strict)
-    (binding [*out* w
+    (binding [*out* body
               *print-meta* true]
       (doseq [datum block-data]
         (let [line (some-> datum :location first)
               loc (when line (str file-name ":" line))]
           (when loc
-            (.write w (str "  ;; " loc "\n")))
-          (.write w "  ")
+            (.write body (str "  ;; " loc "\n")))
+          (.write body "  ")
           (let [eval-form (list 'eval (list 'quote (datum->form datum ns-sym output-ns)))]
             (if (and (:expectation-type datum) loc)
               (prn (list 'testing loc eval-form))
               (prn eval-form))))))
-    (.write w ")\n")))
+    ;; Strip trailing newline so closing ) stays on same line (cljfmt)
+    (let [body-str (str body)]
+      (.write w (str "(defn- " fn-sym " []"))
+      (when (seq body-str)
+        (.write w "\n")
+        (.write w (string/trimr body-str)))
+      (.write w ")\n"))))
 
 (defn write-deftest
   "Write a deftest that calls block fns in order.
   Binds *ns* to the source namespace so eval'd forms resolve there."
   [w ns-sym block-infos]
-  (let [test-sym (str (ns-sym->test-base ns-sym) "-rct")]
+  (let [test-sym (str (ns-sym->test-base ns-sym) "-rct")
+        calls (mapv #(str "(" (:fn-sym %) ")") block-infos)]
     (.write w (str "(deftest " test-sym "\n"))
-    (.write w (str "  (binding [*ns* (the-ns '" ns-sym ")]\n"))
-    (doseq [{:keys [fn-sym]} block-infos]
-      (.write w (str "    (" fn-sym ")\n")))
-    (.write w "))\n\n")))
+    (if (empty? calls)
+      (.write w (str "  (binding [*ns* (the-ns '" ns-sym ")]))\n\n"))
+      (do
+        (.write w (str "  (binding [*ns* (the-ns '" ns-sym ")]\n"))
+        (.write w (str "    " (string/join "\n    " calls) "))\n\n"))))))
 
 (def ^:private error->map-str
   "error->map replaces RCT's error-datafy which uses ex-message
