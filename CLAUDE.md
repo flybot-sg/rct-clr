@@ -16,13 +16,19 @@ rct-clr generates CLR-compatible test files from Rich Comment Tests (`^:rct/test
 # Start nREPL for development
 bb dev
 
-# Run all JVM tests (Kaocha)
-bb test
+# Run all JVM tests (regenerates golden files first, then runs Kaocha)
+bb jvm-test
 
 # Run only RCT-focused tests
 bb rct
 
-# Generate CLR-compatible test file from ^:rct/test blocks
+# Run tests filtered by metadata
+clojure -M:dev:test --focus-meta :rct         # RCT tests only
+
+# Run CLR tests via Nostrand (regenerates golden files, then runs on Magic)
+bb clr-test
+
+# Generate CLR-compatible golden files from ^:rct/test blocks
 bb gen-clr-rct
 
 # Format check / fix
@@ -35,7 +41,7 @@ clojure -M:dev -m rct-clr.gen -o <output-path> -n <namespace> [-s <src-dir>]
 
 ## Architecture
 
-The entire generator lives in `src/rct_clr/gen.clj`. Key flow:
+The entire generator lives in `src/rct_clr/gen.cljc`. Key flow:
 
 - `find-cljc-files` → scans directories for `.cljc` files only (`.clj` ignored)
 - `file->rct-blocks` → extracts RCT test data using rewrite-clj
@@ -46,15 +52,29 @@ The entire generator lives in `src/rct_clr/gen.clj`. Key flow:
   - `throws=>>` → try/catch with matcho matching
 - `write-preamble`, `write-block-fn`, `write-deftest` → emit the generated file
 
-Generated tests use `eval` with `*ns*` binding for namespace isolation. The generated file (`test/rct_clr/rct_generated_test.cljc`) is checked in as a golden file for snapshot testing — re-generate with `bb gen-clr-rct`.
+Generated tests use `eval` with `*ns*` binding for namespace isolation.
+
+**Golden files:** Two generated `.cljc` files are checked in as golden files for snapshot testing — re-generate with `bb gen-clr-rct`:
+- `test/rct_clr/rct_generated_test.cljc` (from `src/`) — snapshot of generator output for gen.cljc's own RCT tests; cannot run on CLR due to JVM-only deps in `rct-clr.gen`
+- `test/rct_clr/sample_generated_test.cljc` (from `examples/` + `examples_clr/`) — CLR-runnable; exercises all assertion types with no JVM-only deps; runs on Magic/Nostrand
+
+**Example source directories** (three dirs with different scanning rules):
+- `examples/` — cross-platform RCT tests, scanned by both the RCT runner (`bb rct`) and the generator (`bb gen-clr-rct`)
+- `examples_clr/` — CLR-only tests with reader conditionals in test expressions; scanned by the generator only (the RCT runner can't eval `#?` in test expressions — see #10)
+- `examples_jvm/` — JVM-only interop tests (e.g. `.getMessage`); scanned by the RCT runner only (the generator would emit JVM interop in CLR output)
+
+**CLR-specific files:**
+- `project.edn` — Nostrand project config (doesn't resolve transitive deps, so matcho is listed directly)
+- `dotnet.clj` — CLR entry points for `nos` (build, run-tests); exits non-zero on test failures
 
 ## Test Configuration
 
 - `tests.edn` — Kaocha config focusing on `:rct` tests, skipping `:unit` and `:clr-only`
 - `tests_with_plugins.edn` — same with profiling and cloverage plugins
-- `test/rct_clr/rc_test.clj` — JVM test runner that scans `src/` for RCT blocks
-- `gen.clj` has inline `^:rct/test` blocks after each function — `bb rct` picks these up automatically
-- `tests.md` — detailed inventory of all test coverage (RCT and integration), including what each test checks
+- `test/rct_clr/rc_test.clj` — JVM test runner that scans `src/`, `examples/`, and `examples_jvm/` for RCT blocks
+- `gen.cljc` has inline `^:rct/test` blocks after each function — `bb rct` picks these up automatically
+- `gen_test.clj` — integration tests for writer functions, file discovery, and golden file snapshot matching
+- `bb jvm-test` regenerates golden files before running tests, so golden file snapshot tests catch uncommitted regeneration drift
 
 ## RCT Test Style
 

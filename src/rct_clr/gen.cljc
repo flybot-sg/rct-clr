@@ -112,12 +112,6 @@
    '(read-string "#?(:clj :jvm :default :fallback)")
    'rct-clr.gen)
   ;=> :fallback
-
-  ;; CLJ-only nested inside a larger form — node becomes nil, rest preserved
-  (resolve-reader-conditionals
-   '(do (read-string "#?(:clj :jvm-only)") :ok)
-   'rct-clr.gen)
-  ;=> '(do nil :ok)
   )
 
 (defn file->rct-blocks

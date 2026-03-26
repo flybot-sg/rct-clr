@@ -2,14 +2,89 @@
 
 Generates CLR-compatible test files from [Rich Comment Tests](https://github.com/parth-io/rich-comment-tests) (`^:rct/test`) blocks.
 
+## Why run RCT tests on the CLR?
+
+RCT tests already run on the JVM, but `.cljc` code targets both platforms. Running the generated tests on the CLR catches issues that JVM-only testing misses:
+
+- **Exception handling:** CLR uses `System.Exception`, not `java.lang.Exception`. `throws=>>` assertions verify the correct exception type is thrown.
+- **Interop correctness:** Method names differ between platforms (e.g. `.getMessage` vs `.Message`).
+- **Runtime differences:** Magic/Nostrand run on Clojure 1.10 with CLR-specific runtime behavior.
+
+## Writing cross-platform RCT tests
+
+Standard `^:rct/test` blocks work unchanged — the generator handles the platform differences. These examples show patterns that are especially useful for cross-platform code.
+
+```clojure
+;;;; Reader conditionals in test expectations
+;;
+;; When a function returns different values per platform, use #? in the
+;; expectation.
+
+(defn platform []
+  #?(:clj :jvm :cljr :clr))
+
+^:rct/test
+(comment
+  (platform)
+  ;=> #?(:clj :jvm :cljr :clr)
+  )
+
+;;;; Exception assertions with throws=>>
+;;
+;; throws=>> verifies that a function throws and pattern-matches the error.
+;; The generator emits catch System.Exception for CLR, so this validates
+;; CLR exception types and error data.
+;;
+;; The generated error->map helper extracts :error/class, :error/message,
+;; and :error/data from the exception, so you can match on any combination.
+
+(defn validate-positive! [x]
+  (when-not (pos? x)
+    (throw (ex-info "must be positive" {:value x}))))
+
+^:rct/test
+(comment
+  (validate-positive! -1)
+  ;throws=>> {:error/message "must be positive"
+              :error/data {:value -1}}
+  )
+
+;;;; Reader conditionals in test expressions
+;;
+;; Reader conditionals cannot be used in test expressions — use separate
+;; files for each platform's interop instead. See issue #10.
+
+;; -- examples_clr/rct_clr/sample_clr.cljc (generator scans this) --
+
+(defn make-error [msg]
+  (ex-info msg {}))
+
+^:rct/test
+(comment
+  (.Message (make-error "boom"))
+  ;=> "boom"
+  )
+
+;; -- examples_jvm/rct_clr/sample_jvm.cljc (RCT runner tests this) --
+
+(defn make-error [msg]
+  (ex-info msg {}))
+
+^:rct/test
+(comment
+  (.getMessage (make-error "boom"))
+  ;=> "boom"
+  )
+```
+
+See [`examples/`](examples/), [`examples_clr/`](examples_clr/), and [`examples_jvm/`](examples_jvm/) for complete working examples.
+
 ## How it works
 
 RCT depends on rewrite-clj and tools.namespace, which are JVM-only. This tool pre-extracts RCT test data into a plain `.cljc` test file that CLR ([Magic](https://github.com/nasser/magic)/[Nostrand](https://github.com/nasser/nostrand)) can run using only `clojure.test` and `matcho.core`.
 
 1. **Extract (JVM):** Run `rct-clr.gen` on the JVM, where rewrite-clj and tools.namespace are available. It scans `.cljc` source files, loads each namespace, finds all `^:rct/test` comment blocks, and writes the assertions into a plain `.cljc` test file. (`.clj` files are ignored.)
 2. **Test (CLR):** Run the generated file on Magic/Nostrand using `clojure.test`. No JVM-only dependencies are needed at test time.
-
-`rct-clr` itself is a JVM-only tool and runs on the JVM to generate test files.
 
 ## Prerequisites
 
@@ -19,7 +94,7 @@ RCT depends on rewrite-clj and tools.namespace, which are JVM-only. This tool pr
 ## Usage
 
 ```bash
-clojure -M -m rct-clr.gen \
+clojure -M:dev -m rct-clr.gen \
   -o test/my_project/rct_generated_test.cljc \
   -n my-project.rct-generated-test
 ```

@@ -1,0 +1,6 @@
+{:name         "rct-clr"
+ :version      "1.0.0"
+ :source-paths ["src" "test" "examples" "examples_clr"]
+ :dependencies [[:github flybot-sg/matcho "magic"
+                 :sha "1edae156dda891b2f1698afc4972f5456f49d039"
+                 :paths ["src"]]]}

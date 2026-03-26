@@ -28,4 +28,7 @@ jobs:
         run: bb fmt-check
 
       - name: Run JVM tests
-        run: bb test
+        run: bb jvm-test
+
+      - name: Run CLR tests
+        run: bb clr-test

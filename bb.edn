@@ -14,9 +14,15 @@
          {:doc  "Run rct"
           :task (clojure "-M:dev:test --focus :rct")}
          gen-clr-rct
-         {:doc  "Generate CLR-compatible RCT test file from ^:rct/test blocks"
-          :task (clojure "-M:dev -m rct-clr.gen -o test/rct_clr/rct_generated_test.cljc -n rct-clr.rct-generated-test")}
-         test
-         {:doc  "Run all tests"
+         {:doc  "Generate CLR-compatible RCT test files (golden files)"
+          :task (do (clojure "-M:dev -m rct-clr.gen -o test/rct_clr/rct_generated_test.cljc -n rct-clr.rct-generated-test")
+                    (clojure "-M:dev -m rct-clr.gen -s examples -s examples_clr -o test/rct_clr/sample_generated_test.cljc -n rct-clr.sample-generated-test"))}
+         jvm-test
+         {:doc  "Run all JVM tests"
           :task (do (run 'gen-clr-rct)
-                    (clojure (apply str "-M:dev:test " (interpose " " *command-line-args*))))}}}
+                    (clojure (apply str "-M:dev:test " (interpose " " *command-line-args*))))}
+         clr-test
+         {:doc  "Run all CLR tests"
+          :task (do (run 'gen-clr-rct)
+                    (shell "rm -rf deps build")
+                    (shell "nos" "dotnet/run-tests"))}}}

@@ -261,25 +261,37 @@
                   datums)))))
 
 ;; ---------------------------------------------------------------------------
-;; Golden file: generator output matches checked-in snapshot
-;; If gen.cljc changes, regenerate with: bb gen-clr-rct
+;; Golden file snapshots
+;;
+;; These tests verify that the checked-in golden files match what the generator
+;; produces. bb jvm-test regenerates the golden files before running tests, so these
+;; catch the case where someone regenerates locally but forgets to commit the
+;; updated golden files.
+;;
+;; Two golden files:
+;; - rct_generated_test.cljc (from src/): cannot run on CLR because it
+;;   pulls in rct-clr.gen which has JVM-only deps.
+;; - sample_generated_test.cljc (from examples/ + examples_clr/): CLR-runnable,
+;;   no JVM-only deps. This is what runs on Magic/Nostrand.
 ;; ---------------------------------------------------------------------------
 
-(def ^:private golden-path
-  "Checked-in snapshot of generated CLR test output."
-  "test/rct_clr/rct_generated_test.cljc")
-(def ^:private golden-ns
-  "Namespace declared in the golden file."
-  'rct-clr.rct-generated-test)
+(def ^:private golden-files
+  "Golden file configs: [src-dirs output-path namespace]."
+  [[["src"] "test/rct_clr/rct_generated_test.cljc"
+    "rct-clr.rct-generated-test"]
+   [["examples" "examples_clr"] "test/rct_clr/sample_generated_test.cljc"
+    "rct-clr.sample-generated-test"]])
 
-(deftest generated-output-matches-golden-file-test
-  (let [tmp (File/createTempFile "rct-golden" ".cljc")]
-    (try
-      (gen/generate {:src-dirs ["src"] :output (str tmp) :namespace (str golden-ns)})
-      (is (= (slurp golden-path) (slurp tmp))
-          "generated output has changed — run bb gen-clr-rct to update the golden file")
-      (finally
-        (.delete tmp)))))
+(deftest generated-output-matches-golden-files-test
+  (doseq [[src-dirs golden-path ns-str] golden-files]
+    (testing (str golden-path " matches generated output")
+      (let [tmp (File/createTempFile "rct-golden" ".cljc")]
+        (try
+          (gen/generate {:src-dirs src-dirs :output (str tmp) :namespace ns-str})
+          (is (= (slurp golden-path) (slurp tmp))
+              "generated output has changed — run bb gen-clr-rct to update golden files")
+          (finally
+            (.delete tmp)))))))
 
 ;; ---------------------------------------------------------------------------
 ;; generate

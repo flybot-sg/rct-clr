@@ -4,10 +4,10 @@
         {:git/url "https://github.com/robertluo/rich-comment-tests"
          :git/sha "6765d3b73a9602aa38b1ad63af889c8c7b47c1d0"}
         org.clojure/tools.cli {:mvn/version "1.4.256"}}
- :aliases {:dev  {:extra-paths ["dev" "test"]
+ :aliases {:dev  {:extra-paths ["dev" "test" "examples" "examples_clr" "examples_jvm"]
                   :extra-deps  {cider/cider-nrepl {:mvn/version "0.56.0"}
                                 lambdaisland/kaocha {:mvn/version "1.91.1392"}}}
-           :test {:extra-paths ["test"]
+           :test {:extra-paths ["test" "examples" "examples_clr" "examples_jvm"]
                   :extra-deps  {lambdaisland/kaocha {:mvn/version "1.91.1392"}
                                 lambdaisland/kaocha-cloverage {:mvn/version "1.1.89"}}
                   :main-opts   ["-m" "kaocha.runner"]}
