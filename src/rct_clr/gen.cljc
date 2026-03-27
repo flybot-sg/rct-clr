@@ -50,7 +50,15 @@
    :string 'clojure.string
    :tr 'clojure.tools.reader
    :walk 'clojure.walk
-   :z 'rewrite-clj.zip})
+   :z 'rewrite-clj.zip}
+
+  ;; namespace with no aliases returns just :current
+  (def rct-test-bare-ns (create-ns (gensym "bare-ns-")))
+  (let [result (build-resolver (ns-name rct-test-bare-ns))]
+    (remove-ns (ns-name rct-test-bare-ns))
+    result)
+  ;=> {:current (ns-name rct-test-bare-ns)}
+  )
 
 (defn resolve-reader-conditionals
   "Post-process a form from z/sexpr to resolve reader conditionals for CLR.
