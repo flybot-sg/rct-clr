@@ -70,7 +70,6 @@ Generated tests use `eval` with `*ns*` binding for namespace isolation.
 ## Test Configuration
 
 - `tests.edn` — Kaocha config focusing on `:rct` tests, skipping `:unit` and `:clr-only`
-- `tests_with_plugins.edn` — same with profiling and cloverage plugins
 - `test/rct_clr/rc_test.clj` — JVM test runner that scans `src/`, `examples/`, and `examples_jvm/` for RCT blocks
 - `gen.cljc` has inline `^:rct/test` blocks after each function — `bb rct` picks these up automatically
 - `gen_test.clj` — integration tests for writer functions, file discovery, and golden file snapshot matching
