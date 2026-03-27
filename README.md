@@ -1,6 +1,6 @@
 # rct-clr
 
-Generates CLR-compatible test files from [Rich Comment Tests](https://github.com/parth-io/rich-comment-tests) (`^:rct/test`) blocks.
+Generates CLR-compatible test files from [Rich Comment Tests](https://github.com/robertluo/rich-comment-tests) (`^:rct/test`) blocks.
 
 ## Why run RCT tests on the CLR?
 

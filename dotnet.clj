@@ -6,9 +6,7 @@
 
   This namespace provides convenient functions to:
   - compile the prod namespaces to .net assemblies
-  - run the tests in the CLR
-  - pack and push NuGet Packages to a host repo"
-
+  - run the tests in the CLR"
   (:require [clojure.test :refer [run-all-tests]]
             [magic.flags :as mflags]))
 

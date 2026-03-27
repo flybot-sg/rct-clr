@@ -21,6 +21,9 @@
          {:doc  "Run all JVM tests"
           :task (do (run 'gen-clr-rct)
                     (clojure (apply str "-M:dev:test " (interpose " " *command-line-args*))))}
+         outdated
+         {:doc "Show outdated dependencies"
+          :task (clojure "-M:outdated")}
          clr-test
          {:doc  "Run all CLR tests"
           :task (do (run 'gen-clr-rct)

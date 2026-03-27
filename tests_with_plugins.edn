@@ -1,8 +1,0 @@
-#kaocha/v1
- {:kaocha.filter/skip-meta [:clr-only]
-  :tests [{:id :rct
-           :focus-meta [:rct]}
-          {:id :unit
-           :skip-meta [:rct]}]
-  :plugins [:kaocha.plugin/profiling
-            :kaocha.plugin/cloverage]}
