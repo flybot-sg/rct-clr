@@ -21,4 +21,8 @@
   ;; simple reader conditional in test expression
   #?(:clj :jvm :cljr :clr)
   ;=> #?(:clj :jvm :cljr :clr)
+
+  ;; reader conditional nested inside a larger expression
+  (str "error: " #?(:clj (.getMessage (make-error "boom")) :cljr (.Message (make-error "boom"))))
+  ;=> "error: boom"
   )

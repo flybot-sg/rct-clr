@@ -63,11 +63,13 @@
        (if (and (list? x)
                 (= 'read-string (first x))
                 (string? (second x))
-                (string/starts-with? (second x) "#?"))
-         ;; Parse with :preserve to inspect branch keys first — tools.reader
-         ;; throws EOF when no branch matches (e.g. #?(:clj ...)) with #{:cljr},
+                (string/includes? (second x) "#?"))
+         ;; Parse with :preserve to inspect branch keys — tools.reader throws
+         ;; EOF when no branch matches (e.g. #?(:clj ...)) with #{:cljr},
          ;; so CLJ-only conditionals must be detected and dropped to nil.
-         (let [rc (tr/read-string {:read-cond :preserve} (second x))
+         ;; Extract from #? position so :preserve doesn't hit data readers.
+         (let [rc (tr/read-string {:read-cond :preserve}
+                                  (subs (second x) (string/index-of (second x) "#?")))
                branch-keys (set (take-nth 2 (.form rc)))]
            (when (or (branch-keys :cljr) (branch-keys :default))
              (binding [*ns* target-ns]
@@ -93,9 +95,23 @@
   ;;        (catch System.Exception e
   ;;          (.Message e)))
 
+  ;; resolves reader conditional nested inside a regular expression
+  (resolve-reader-conditionals
+   '(+ (/ pos-score visits)
+       (read-string "#?(:clj (Math/sqrt visits) :cljr (Math/Sqrt visits))"))
+   'rct-clr.gen)
+  ;=> '(+ (/ pos-score visits)
+  ;;       (Math/Sqrt visits))
+
   ;; passes through forms without reader conditionals unchanged
   (resolve-reader-conditionals '(+ 1 2) 'rct-clr.gen)
   ;=> '(+ 1 2)
+
+  ;; resolves #? inside a tagged literal
+  (resolve-reader-conditionals
+   '(read-string "#inst #?(:clj \"2024\" :cljr \"2025\")")
+   'rct-clr.gen)
+  ;=> #inst "2025-01-01T00:00:00.000-00:00"
 
   ;; doesn't touch non-reader-conditional read-string calls
   (resolve-reader-conditionals '(read-string "[1 2 3]") 'rct-clr.gen)

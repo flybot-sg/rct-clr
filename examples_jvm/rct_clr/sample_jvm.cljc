@@ -11,4 +11,8 @@
   ;; JVM interop — mirrors the CLR test in sample_clr.cljc
   (.getMessage (make-error "boom"))
   ;=> "boom"
+
+  ;; JVM interop nested inside a larger expression — mirrors CLR test
+  (str "error: " (.getMessage (make-error "boom")))
+  ;=> "error: boom"
   )

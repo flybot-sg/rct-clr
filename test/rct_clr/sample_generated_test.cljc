@@ -125,7 +125,9 @@
   ;; sample_clr.cljc:18
   (testing "sample_clr.cljc:18" (eval (quote (clojure.test/is (= "boom" (.Message (make-error "boom")))))))
   ;; sample_clr.cljc:22
-  (testing "sample_clr.cljc:22" (eval (quote (clojure.test/is (= :clr :clr))))))
+  (testing "sample_clr.cljc:22" (eval (quote (clojure.test/is (= :clr :clr)))))
+  ;; sample_clr.cljc:26
+  (testing "sample_clr.cljc:26" (eval (quote (clojure.test/is (= "error: boom" (str "error: " (.Message (make-error "boom")))))))))
 (deftest rct-clr-sample-clr-rct
   (binding [*ns* (the-ns 'rct-clr.sample-clr)]
     (rct-clr-sample-clr-rct-block-0)))
