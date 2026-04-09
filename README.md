@@ -110,7 +110,9 @@ clojure -M:dev -m rct-clr.gen \
 
 ## Using it for your repository
 
-### deps.edn
+### CLR testing setup
+
+#### deps.edn
 
 Add as a dev dependency:
 
@@ -123,7 +125,7 @@ Add as a dev dependency:
 
 Since `rct-clr` transitively brings in `rich-comment-tests`, you can remove any existing direct RCT dependency from your `deps.edn`.
 
-### project.edn
+#### project.edn
 
 Nostrand does not resolve transitive dependencies. Add [matcho](https://github.com/flybot-sg/matcho/tree/magic) directly to your `project.edn` dependencies, since the generated tests use `matcho.core/assert` for `=>>` patterns:
 
@@ -133,7 +135,7 @@ Nostrand does not resolve transitive dependencies. Add [matcho](https://github.c
                  :paths ["src"]]]}
 ```
 
-### `bb.edn`
+#### `bb.edn` - generating CLR test file
 
 If you use Babashka to run scripts, you can do this too:
 
@@ -143,12 +145,43 @@ If you use Babashka to run scripts, you can do this too:
           :task (clojure "-M:dev -m rct-clr.gen -o test/my_project/rct_generated_test.cljc -n my-project.rct-generated-test")}}}
 ```
 
-### tests.edn - JVM test runner (Kaocha)
+### JVM testing setup
 
-The generated file has `^:clr-only` metadata on its namespace. Add this to your `tests.edn` so Kaocha skips it on JVM:
+#### `rc_test.clj` — RCT runner
+
+Create a test file that runs RCT blocks on the JVM using the `rich-comment-tests` runner:
 
 ```clojure
-:kaocha.filter/skip-meta [:clr-only]
+(ns my-project.rc-test
+  (:require [clojure.test :refer [deftest testing]]
+            [com.mjdowney.rich-comment-tests.test-runner :as test-runner]))
+
+(deftest ^:rct rich-comment-tests
+  (testing "Rich comment tests."
+    (test-runner/run-tests-in-file-tree! :dirs #{"src"})))
+```
+
+#### `tests.edn`
+
+Skip the generated CLR on JVM and split tests into `:rct` and `:unit` suites so they can be run independently:
+
+```clojure
+#kaocha/v1
+ {:kaocha.filter/skip-meta [:clr-only]
+  :tests [{:id :rct
+           :focus-meta [:rct]}
+          {:id :unit
+           :skip-meta [:rct]}]}
+```
+
+#### `bb.edn` - running on JVM
+
+To run only the RCT tests on JVM without running the full test suite:
+
+```clojure
+{:tasks {rct
+         {:doc  "Run rct"
+          :task (clojure "-M:dev:test --focus :rct")}}}
 ```
 
 ### dotnet.clj
@@ -168,6 +201,7 @@ Add the generated file to your `.gitignore`.
 ### CI notes
 
 - If your CI caches untracked files (e.g. GitLab CI `cache: untracked: true`), delete the generated file before format checks to avoid stale copies causing failures:
+
   ```bash
   rm -f test/my_project/rct_generated_test.cljc
   ```
