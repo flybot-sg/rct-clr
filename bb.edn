@@ -25,7 +25,6 @@
          {:doc "Show outdated dependencies"
           :task (clojure "-M:outdated")}
          clr-test
-         {:doc  "Run all CLR tests"
+         {:doc  "Run all CLR tests (build dir cleaned by nostrand's :clean?)"
           :task (do (run 'gen-clr-rct)
-                    (shell "rm -rf deps build")
                     (shell "nos" "dotnet/run-tests"))}}}

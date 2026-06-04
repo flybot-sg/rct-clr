@@ -22,7 +22,7 @@
   "Compiles the project to dlls.
   nos dotnet/build"
   []
-  (tasks/compile-project :namespaces prod-namespaces :aliases [:test]))
+  (tasks/compile-project :namespaces prod-namespaces :aliases [:test] :clean? true))
 
 (defn run-tests
   "Run all the tests on the CLR.
@@ -30,4 +30,9 @@
   []
   (tasks/run-clojure-tests
    :namespaces (concat prod-namespaces test-namespaces)
-   :aliases    [:clr :test]))
+   :aliases    [:clr :test]
+   ;; run-clojure-tests sweeps ALL loaded namespaces (clojure.*, magic.*,
+   ;; nostrand.*, matcho.core, ...), not just :namespaces. The :re filter
+   ;; scopes the run to this project so dependency suites can't sneak in.
+   ;; re-matches semantics: must match the full ns name, hence trailing .*
+   :re         #"rct-clr\..*"))

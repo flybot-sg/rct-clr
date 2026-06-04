@@ -10,9 +10,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/flybot-sg/ci-clj-clr:2.0.0
+      image: ghcr.io/flybot-sg/ci-clj-clr:2.1.0
     steps:
       - uses: actions/checkout@v6
+
+      # Job-level env: cannot expand $HOME; nostrand and tools.deps read GITLIBS
+      # literally, so it must be an absolute path. This makes nostrand clone its
+      # git deps under ~/.gitlibs/nostrand/, which the cache step below persists.
+      - name: Point nostrand git deps at the cached gitlibs dir
+        run: echo "GITLIBS=$HOME/.gitlibs" >> "$GITHUB_ENV"
 
       - uses: actions/cache@v5
         with:
