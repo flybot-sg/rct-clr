@@ -64,8 +64,7 @@ Generated tests use `eval` with `*ns*` binding for namespace isolation.
 - `examples_jvm/` — JVM-only interop tests (e.g. `.getMessage`); scanned by the RCT runner only (the generator would emit JVM interop in CLR output)
 
 **CLR-specific files:**
-- `project.edn` — Nostrand project config (doesn't resolve transitive deps, so matcho is listed directly)
-- `dotnet.clj` — CLR entry points for `nos` (build, run-tests); exits non-zero on test failures
+- `dotnet.clj` — CLR entry points for `nos` (build, run-tests); exits non-zero on test failures. Deps resolve from `deps.edn` (the `:clr` alias overrides matcho with the MAGIC fork)
 
 ## Test Configuration
 

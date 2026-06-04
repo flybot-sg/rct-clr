@@ -7,8 +7,7 @@
   This namespace provides convenient functions to:
   - compile the prod namespaces to .net assemblies
   - run the tests in the CLR"
-  (:require [clojure.test :refer [run-all-tests]]
-            [magic.flags :as mflags]))
+  (:require [nostrand.tasks :as tasks]))
 
 (def prod-namespaces
   '[rct-clr.sample
@@ -23,26 +22,12 @@
   "Compiles the project to dlls.
   nos dotnet/build"
   []
-  (binding [*compile-path*                  "build"
-            *unchecked-math*                *warn-on-reflection*
-            mflags/*strongly-typed-invokes* true
-            mflags/*direct-linking*         true
-            mflags/*elide-meta*             false]
-    (println "Compile into DLL To : " *compile-path*)
-    (doseq [ns prod-namespaces]
-      (println (str "Compiling " ns))
-      (compile ns))))
+  (tasks/compile-project :namespaces prod-namespaces :aliases [:test]))
 
 (defn run-tests
   "Run all the tests on the CLR.
   nos dotnet/run-tests"
   []
-  (binding [*unchecked-math*                *warn-on-reflection*
-            mflags/*strongly-typed-invokes* true
-            mflags/*direct-linking*         true
-            mflags/*elide-meta*             false]
-    (doseq [ns (concat prod-namespaces test-namespaces)]
-      (require ns))
-    (let [{:keys [fail error]} (run-all-tests)]
-      (when (or (pos? fail) (pos? error))
-        (Environment/Exit 1)))))
+  (tasks/run-clojure-tests
+   :namespaces (concat prod-namespaces test-namespaces)
+   :aliases    [:clr :test]))

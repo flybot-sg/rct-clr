@@ -4,7 +4,11 @@
         {:git/url "https://github.com/robertluo/rich-comment-tests"
          :git/sha "6765d3b73a9602aa38b1ad63af889c8c7b47c1d0"}
         org.clojure/tools.cli {:mvn/version "1.4.256"}}
- :aliases {:dev  {:extra-paths ["dev" "test" "examples" "examples_clr" "examples_jvm"]
+ :aliases {;; CLR-only: swap the JVM matcho (pulled transitively by rich-comment-tests)
+           ;; for the MAGIC fork, so generated deftest+matcho assertions run on the CLR.
+           :clr  {:override-deps {healthsamurai/matcho {:git/url "https://github.com/flybot-sg/matcho"
+                                                        :git/sha "31225e185d5bbc2f13529730865bf9563677e646"}}}
+           :dev  {:extra-paths ["dev" "test" "examples" "examples_clr" "examples_jvm"]
                   :extra-deps  {cider/cider-nrepl {:mvn/version "0.58.0"}
                                 lambdaisland/kaocha {:mvn/version "1.91.1392"}}}
            :test {:extra-paths ["test" "examples" "examples_clr" "examples_jvm"]

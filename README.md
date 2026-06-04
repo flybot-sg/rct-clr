@@ -125,14 +125,13 @@ Add as a dev dependency:
 
 Since `rct-clr` transitively brings in `rich-comment-tests`, you can remove any existing direct RCT dependency from your `deps.edn`.
 
-#### project.edn
-
-Nostrand does not resolve transitive dependencies. Add [matcho](https://github.com/flybot-sg/matcho/tree/magic) directly to your `project.edn` dependencies, since the generated tests use `matcho.core/assert` for `=>>` patterns:
+Nostrand resolves dependencies from `deps.edn` directly. The generated tests use `matcho.core/assert` for `=>>` patterns, so add a `:clr` alias that swaps the JVM matcho (pulled transitively by `rich-comment-tests`) for the [MAGIC fork](https://github.com/flybot-sg/matcho/tree/magic):
 
 ```clojure
-{:dependencies [[:github flybot-sg/matcho "magic"
-                 :sha "1edae156dda891b2f1698afc4972f5456f49d039"
-                 :paths ["src"]]]}
+{:aliases
+ {:clr {:override-deps {healthsamurai/matcho
+                        {:git/url "https://github.com/flybot-sg/matcho"
+                         :git/sha "31225e185d5bbc2f13529730865bf9563677e646"}}}}}
 ```
 
 #### `bb.edn` - generating CLR test file

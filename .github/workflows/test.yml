@@ -10,7 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/flybot-sg/ci-clj-clr:1.2.0
+      image: ghcr.io/flybot-sg/ci-clj-clr:2.0.0
     steps:
       - uses: actions/checkout@v6
 
