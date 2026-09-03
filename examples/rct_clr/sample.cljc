@@ -1,6 +1,6 @@
 (ns rct-clr.sample
   "Comprehensive sample exercising all RCT assertion types and edge cases for
-  CLR golden file generation. No JVM-only dependencies — the generated output
+  CLR golden file generation. No JVM-only dependencies, so the generated output
   is runnable on CLR with only clojure.test and matcho.core."
   (:require [clojure.set :as set]
             [clojure.string :as str]
@@ -48,15 +48,15 @@
   (suits)
   ;=> (:h :c :s :d)
 
-  ;; a number in head position, the value-type case
+  ;; a number in head position
   (map inc (range 3))
   ;=> (1 2 3)
 
-  ;; a symbol compares as a symbol, it is not resolved
+  ;; a symbol is compared, not resolved
   (a-symbol)
   ;=> foo
 
-  ;; an expectation that does evaluate keeps its value
+  ;; an expectation that evaluates keeps its value
   (count (suits))
   ;=> (+ 2 2)
   )

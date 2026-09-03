@@ -2,17 +2,15 @@
 
 Generates CLR-compatible test files from [Rich Comment Tests](https://github.com/robertluo/rich-comment-tests) (`^:rct/test`) blocks.
 
-## Why run RCT tests on the CLR?
+## Rationale
 
-RCT tests already run on the JVM, but `.cljc` code targets both platforms. Running the generated tests on the CLR catches issues that JVM-only testing misses:
+A cross-platform library runs its `deftest` suites on the CLR. Its `^:rct/test` blocks are tests too, but `rich-comment-tests` needs rewrite-clj and tools.namespace to extract them, and neither runs on the CLR.
 
-- **Exception handling:** CLR uses `System.Exception`, not `java.lang.Exception`. `throws=>>` assertions verify the correct exception type is thrown.
-- **Interop correctness:** Method names differ between platforms (e.g. `.getMessage` vs `.Message`).
-- **Runtime differences:** Magic/Nostrand run on Clojure 1.10 with CLR-specific runtime behavior.
+Porting RCT would mean porting its reader and its rewriter, when the blocks only have to become assertions. `nos` and `cljr` already run `deftest`, so this generates one.
 
 ## Writing cross-platform RCT tests
 
-Standard `^:rct/test` blocks work unchanged — the generator handles the platform differences. These examples show patterns that are especially useful for cross-platform code.
+Standard `^:rct/test` blocks work unchanged: the generator handles the platform differences.
 
 ```clojure
 ;;;; Reader conditionals in test expectations
@@ -46,12 +44,12 @@ Standard `^:rct/test` blocks work unchanged — the generator handles the platfo
 (comment
   (validate-positive! -1)
   ;throws=>> {:error/message "must be positive"
-              :error/data {:value -1}}
+  ;;          :error/data {:value -1}}
   )
 
 ;;;; Reader conditionals in test expressions
 ;;
-;; Reader conditionals cannot be used in test expressions — use separate
+;; Reader conditionals cannot be used in test expressions, use separate
 ;; files for each platform's interop instead. See issue #10.
 
 ;; -- examples_clr/rct_clr/sample_clr.cljc (generator scans this) --
@@ -81,15 +79,13 @@ See [`examples/`](examples/), [`examples_clr/`](examples_clr/), and [`examples_j
 
 ## How it works
 
-RCT depends on rewrite-clj and tools.namespace, which are JVM-only. This tool pre-extracts RCT test data into a plain `.cljc` test file that CLR ([Magic](https://github.com/nasser/magic)/[Nostrand](https://github.com/nasser/nostrand)) can run using only `clojure.test` and `matcho.core`.
-
-1. **Extract (JVM):** Run `rct-clr.gen` on the JVM, where rewrite-clj and tools.namespace are available. It scans `.cljc` source files, loads each namespace, finds all `^:rct/test` comment blocks, and writes the assertions into a plain `.cljc` test file. (`.clj` files are ignored.)
-2. **Test (CLR):** Run the generated file on Magic/Nostrand using `clojure.test`. No JVM-only dependencies are needed at test time.
+1. **Extract (JVM):** `rct-clr.gen` scans `.cljc` source files, loads each namespace, finds every `^:rct/test` block, and writes the assertions into a plain `.cljc` test file. (`.clj` files are ignored.)
+2. **Test (CLR):** Run that file with `clojure.test` on MAGIC or ClojureCLR. It needs only `clojure.test` and `matcho.core`.
 
 ## Prerequisites
 
-- JVM Clojure (for running the generator)
-- [Magic](https://github.com/nasser/magic)/[Nostrand](https://github.com/nasser/nostrand) on the target CLR platform (for running generated tests)
+- JVM Clojure, to run the generator
+- [MAGIC and Nostrand](https://github.com/flybot-sg/magic), or [ClojureCLR](https://github.com/clojure/clojure-clr), to run the generated tests
 
 ## Usage
 
@@ -127,7 +123,7 @@ Since `rct-clr` transitively brings in `rich-comment-tests`, you can remove any 
 
 #### deps-clr.edn
 
-`nos` and `cljr` read `deps-clr.edn` in place of `deps.edn`, so the CLR coordinates live there. The generated tests call `matcho.core/assert` for `=>>` patterns, so declare matcho, and the ClojureCLR test runner to drive `cljr -X:test`:
+CLR coordinates go in [`deps-clr.edn`](https://github.com/flybot-sg/magic/blob/main/docs/clr-dependency-files.md). Two entries matter here: matcho, which the generated tests call for `=>>` patterns, and the ClojureCLR test runner that drives `cljr -X:test`.
 
 ```clojure
 {:paths ["src"]
@@ -167,7 +163,7 @@ Run those two in CI rather than bare `nos test` / `cljr -X:test`, so the generat
 
 ### JVM testing setup
 
-#### `rc_test.clj` — RCT runner
+#### `rc_test.clj`, the RCT runner
 
 Create a test file that runs RCT blocks on the JVM using the `rich-comment-tests` runner:
 
@@ -206,7 +202,7 @@ To run only the RCT tests on JVM without running the full test suite:
 
 ### magic.edn
 
-`nos test` derives its namespaces from the source paths, which picks up the JVM-only RCT runner as well. Exclude it:
+[`nos test`](https://github.com/flybot-sg/magic/blob/main/docs/nos-cli.md) derives its namespaces from the source paths, so it picks up the JVM-only RCT runner too. Exclude it:
 
 ```clojure
 {:test {:exclude [my-project.rc-test]}}
@@ -228,17 +224,17 @@ Add the generated file to your `.gitignore`.
 
 The generated file contains:
 
-- A namespace with `^:clr-only` metadata (skipped by JVM test runners that filter on this)
-- An `error->map` helper (replaces RCT's `error-datafy` which uses `ex-message`, unavailable on Magic/Clojure 1.10)
-- One `deftest` per source namespace, with assertions using `clojure.test/is` for `=>`, `matcho.core/assert` for `=>>`, and `try`/`catch` with matcho matching for `throws=>>`
-- Side-effect forms (e.g. `def`, `require`) from RCT blocks that have no assertion are emitted as bare `eval` calls
+- A namespace with `^:clr-only` metadata, which JVM test runners filtering on it skip
+- Three helpers, since the generated file requires only `clojure.test` and `matcho.core` and so cannot call RCT's own: `error->map` builds the map a `throws=>>` pattern matches against, `eval-expectation` evaluates a `=>` expectation and falls back to the form when that throws, and `bind-repl-vars!` carries each result into `*1`
+- One `deftest` per source namespace, binding `*ns*` and the REPL vars, with `clojure.test/is` for `=>`, `matcho.core/assert` for `=>>`, and `try`/`catch` plus matcho for `throws=>>`
+- A form with no assertion (`def`, `require`) is emitted for its side effect
 
 Example output (abbreviated):
 
 ```clojure
 (ns ^:clr-only my-project.rct-generated-test
   "Auto-generated from ^:rct/test blocks. Do not edit manually."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.test :refer [deftest testing]]
             [matcho.core]
             [my-project.core]))
 
@@ -247,14 +243,29 @@ Example output (abbreviated):
    :error/message #?(:clj (.getMessage e) :cljr (.Message e))
    :error/data (ex-data e)})
 
+(defn eval-expectation [form]
+  (try
+    (eval form)
+    (catch #?(:clj Exception :cljr System.Exception) _
+      form)))
+
+(defn bind-repl-vars! [result]
+  (set! *3 *2)
+  (set! *2 *1)
+  (set! *1 result)
+  result)
+
 ;; my-project.core
 (defn- my-project-core-rct-block-0 []
   ;; core.cljc:42
-  (testing "core.cljc:42" (eval (quote (clojure.test/is (= 4 (+ 2 2))))))
+  (testing "core.cljc:42"
+    (eval (quote (clojure.test/is (= 4 (my-project.rct-generated-test/bind-repl-vars! (+ 2 2)))))))
   ;; core.cljc:45
-  (testing "core.cljc:45" (eval (quote (matcho.core/assert {:status 200} (fetch))))))
+  (testing "core.cljc:45"
+    (eval (quote (matcho.core/assert {:status 200} (my-project.rct-generated-test/bind-repl-vars! (fetch)))))))
 
 (deftest my-project-core-rct
-  (binding [*ns* (the-ns 'my-project.core)]
+  (binding [*ns* (the-ns 'my-project.core)
+            *1 nil, *2 nil, *3 nil, *e nil]
     (my-project-core-rct-block-0)))
 ```

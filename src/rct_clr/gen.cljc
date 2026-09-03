@@ -13,7 +13,7 @@
             [rewrite-clj.zip :as z]))
 
 (defn find-cljc-files
-  "Find all .cljc files in dir. Ignores .clj — CLR can only run .cljc."
+  "Find all .cljc files in dir. Ignores .clj, since CLR can only run .cljc."
   [dir]
   (->> (io/file dir)
        file-seq
@@ -62,7 +62,7 @@
 
 (defn resolve-reader-conditionals
   "Post-process a form from z/sexpr to resolve reader conditionals for CLR.
-  rewrite-clj wraps unresolved #? forms as (read-string \"#?(...)\") — this
+  rewrite-clj wraps unresolved #? forms as (read-string \"#?(...)\"), so this
   walks the tree and resolves them with :features #{:cljr}."
   [form ns-sym]
   (let [target-ns (the-ns ns-sym)]
@@ -72,7 +72,7 @@
                 (= 'read-string (first x))
                 (string? (second x))
                 (string/includes? (second x) "#?"))
-         ;; Parse with :preserve to inspect branch keys — tools.reader throws
+         ;; Parse with :preserve to inspect branch keys, since tools.reader throws
          ;; EOF when no branch matches (e.g. #?(:clj ...)) with #{:cljr},
          ;; so CLJ-only conditionals must be detected and dropped to nil.
          ;; Extract from #? position so :preserve doesn't hit data readers.
@@ -154,9 +154,9 @@
          (filter seq))))
 
 (defn self-evaluating?
-  "True when x can be emitted into code position as-is. A seq evaluates as a
-  call and a symbol as a var reference, so a collection is self-evaluating only
-  when every element is."
+  "True when x can be emitted into code position as-is: a seq evaluates as a
+  call and a symbol as a var reference, so a collection qualifies only when
+  every element does."
   [x]
   (cond
     (or (seq? x) (symbol? x)) false
@@ -199,7 +199,7 @@
               expectation-string)]
       ;; Bind *ns* so :: keywords resolve to the source namespace
       ;; Use :read-cond :allow with :cljr so #? resolves to CLR branch.
-      ;; Can't use :preserve — Magic's eval can't compile ReaderConditional constants.
+      ;; Can't use :preserve: Magic's eval can't compile ReaderConditional constants.
       (binding [*ns* (the-ns ns-sym)]
         (tr/read-string {:read-cond :allow :features #{:cljr}} s)))))
 
@@ -259,10 +259,8 @@
 
 (defn datum->form
   "Convert an RCT datum to a Clojure form for the generated test.
-  Value-producing forms pass through bind-repl-vars! so a later form in the
-  same block can chain off *1. A => expectation that is not self-evaluating goes
-  through eval-expectation at test time, so an earlier form's defs are in place
-  by the time it evaluates."
+  A => expectation that is not self-evaluating goes through eval-expectation at
+  test time, so an earlier form's defs are in place when it evaluates."
   [{:keys [test-sexpr expectation-type] :as datum} ns-sym output-ns]
   (let [error->map-sym (symbol (str output-ns) "error->map")
         eval-sym (symbol (str output-ns) "eval-expectation")
@@ -378,7 +376,7 @@
   [w fn-sym block-data ns-sym file output-ns]
   (let [file-name (.getName file)
         body (java.io.StringWriter.)]
-    ;; prn, not pprint — pprint drops metadata (e.g. ^:matcho/strict)
+    ;; prn, not pprint: pprint drops metadata (e.g. ^:matcho/strict)
     (binding [*out* body
               *print-meta* true]
       (doseq [datum block-data]
@@ -416,8 +414,8 @@
         (.write w (str "    " (string/join "\n    " calls) "))\n\n"))))))
 
 (def ^:private error->map-str
-  "error->map replaces RCT's error-datafy which uses ex-message
-  (Clojure 1.11+, unavailable on Magic 1.10). Eval'd throws=>> forms
+  "The generated file requires only clojure.test and matcho.core, so it cannot
+  call RCT's error-datafy and carries this instead. Eval'd throws=>> forms
   reference it fully-qualified so it resolves regardless of *ns* binding.
   Raw string because #? reader conditionals can't be represented as
   Clojure data for prn to print."
@@ -427,9 +425,8 @@
    :error/data (ex-data e)})")
 
 (def ^:private eval-expectation-str
-  "eval-expectation reproduces RCT's expectation handling: evaluate the form,
-  and compare against the form itself when evaluating it throws, which is what
-  makes a data-valued list compare as data."
+  "Mirrors RCT's expectation handling, which is what makes a data-valued list
+  compare as data instead of being called."
   "(defn eval-expectation [form]
   (try
     (eval form)
@@ -437,8 +434,8 @@
       form)))")
 
 (def ^:private bind-repl-vars-str
-  "bind-repl-vars! carries a form's value into *1 so a later form in the same
-  block can chain off it, as RCT does. write-deftest binds the vars."
+  "Carries a form's value into *1 so a later form in the same block can chain
+  off it, as RCT does."
   "(defn bind-repl-vars! [result]
   (set! *3 *2)
   (set! *2 *1)
@@ -446,7 +443,7 @@
   result)")
 
 (defn write-preamble
-  "Write the ns form and the error->map, eval-expectation and bind-repl-vars! helpers.
+  "Write the ns form and the helpers the generated tests call.
   The ns is tagged ^:clr-only so Kaocha skips it on the JVM."
   [w output-ns ns-syms]
   (let [requires (sort ns-syms)
@@ -529,7 +526,7 @@
                           :when (if ns-sym
                                   true
                                   (do (println "Warning: skipping" (str f)
-                                               "— no ns form found")
+                                               "(no ns form)")
                                       false))
                           :let [_ (try (require ns-sym)
                                        (catch Exception e
