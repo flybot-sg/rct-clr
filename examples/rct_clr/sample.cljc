@@ -61,6 +61,25 @@
   ;=> (+ 2 2)
   )
 
+;; --- Chaining off *1 and *2 ---
+
+(defn stack-push [stack x]
+  (conj stack x))
+
+^:rct/test
+(comment
+  (stack-push [1 2] 3)
+  ;=> [1 2 3]
+
+  ;; *1 carries the previous result
+  (count *1)
+  ;=> 3
+
+  ;; *2 reaches one form further back
+  (peek *2)
+  ;=> 3
+  )
+
 ;; --- String operations and alias-qualified calls ---
 
 (defn greet [name]
