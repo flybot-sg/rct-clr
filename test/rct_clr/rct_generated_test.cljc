@@ -79,42 +79,42 @@
   ;; gen.cljc:254
   (testing "gen.cljc:254" (eval (quote (try (read-expectation {:expectation-type (quote =>), :expectation-string "[1 2"} (quote rct-clr.gen)) (clojure.test/is false "Expected exception") (catch System.Exception e (set! *e e) (matcho.core/assert {} (rct-clr.rct-generated-test/error->map e))))))))
 (defn- rct-clr-gen-rct-block-4 []
-  ;; gen.cljc:291
-  (testing "gen.cljc:291" (eval (quote (clojure.test/is (= (rct-clr.rct-generated-test/eval-expectation (quote (quote (test-output-ns/bind-repl-vars! (def x 1))))) (rct-clr.rct-generated-test/bind-repl-vars! (datum->form {:expectation-type nil, :test-sexpr (quote (def x 1))} (quote rct-clr.gen) (quote test-output-ns))))))))
-  ;; gen.cljc:298
-  (testing "gen.cljc:298" (eval (quote (clojure.test/is (= (rct-clr.rct-generated-test/eval-expectation (quote (quote (clojure.test/is (= 3 (test-output-ns/bind-repl-vars! (+ 1 2))))))) (rct-clr.rct-generated-test/bind-repl-vars! (datum->form {:expectation-type (quote =>), :test-sexpr (quote (+ 1 2)), :expectation-string "3"} (quote rct-clr.gen) (quote test-output-ns))))))))
-  ;; gen.cljc:306
-  (testing "gen.cljc:306" (eval (quote (clojure.test/is (= (rct-clr.rct-generated-test/eval-expectation (quote (quote (clojure.test/is (= (test-output-ns/eval-expectation (quote (:h :c :s :d nil))) (test-output-ns/bind-repl-vars! (order))))))) (rct-clr.rct-generated-test/bind-repl-vars! (datum->form {:expectation-type (quote =>), :test-sexpr (quote (order)), :expectation-string "(:h :c :s :d nil)"} (quote rct-clr.gen) (quote test-output-ns))))))))
-  ;; gen.cljc:314
-  (testing "gen.cljc:314" (eval (quote (clojure.test/is (= (rct-clr.rct-generated-test/eval-expectation (quote (quote (matcho.core/assert {:status 200} (test-output-ns/bind-repl-vars! (get-status)))))) (rct-clr.rct-generated-test/bind-repl-vars! (datum->form {:expectation-type (quote =>>), :test-sexpr (quote (get-status)), :expectation-string "{:status 200}"} (quote rct-clr.gen) (quote test-output-ns))))))))
-  ;; gen.cljc:322
-  (testing "gen.cljc:322" (eval (quote (clojure.test/is (= (rct-clr.rct-generated-test/eval-expectation (quote (quote (matcho.core/assert [0 1] (test-output-ns/bind-repl-vars! (range 5)))))) (rct-clr.rct-generated-test/bind-repl-vars! (datum->form {:expectation-type (quote =>>), :test-sexpr (quote (range 5)), :expectation-string "[0 1 ...]"} (quote rct-clr.gen) (quote test-output-ns))))))))
-  ;; gen.cljc:330
-  (testing "gen.cljc:330" (eval (quote (clojure.test/is (= (rct-clr.rct-generated-test/eval-expectation (quote (quote (try (boom!) (clojure.test/is false "Expected exception") (catch System.Exception e (set! *e e) (matcho.core/assert #:error{:class Exception} (test-output-ns/error->map e))))))) (rct-clr.rct-generated-test/bind-repl-vars! (datum->form {:expectation-type (quote throws=>>), :test-sexpr (quote (boom!)), :expectation-string "{:error/class Exception}"} (quote rct-clr.gen) (quote test-output-ns))))))))
-  ;; gen.cljc:344
-  (testing "gen.cljc:344" (eval (quote (clojure.test/is (= (rct-clr.rct-generated-test/eval-expectation (quote (quote (clojure.test/is (= :clr (test-output-ns/bind-repl-vars! (get-platform))))))) (rct-clr.rct-generated-test/bind-repl-vars! (datum->form {:expectation-type (quote =>), :test-sexpr (quote (get-platform)), :expectation-string "#?(:clj :jvm :cljr :clr)"} (quote rct-clr.gen) (quote test-output-ns))))))))
-  ;; gen.cljc:352
-  (testing "gen.cljc:352" (eval (quote (clojure.test/is (= (rct-clr.rct-generated-test/eval-expectation (quote (quote (clojure.test/is (= :rct-clr.gen/foo (test-output-ns/bind-repl-vars! (get-type))))))) (rct-clr.rct-generated-test/bind-repl-vars! (datum->form {:expectation-type (quote =>), :test-sexpr (quote (get-type)), :expectation-string "::foo"} (quote rct-clr.gen) (quote test-output-ns)))))))))
+  ;; gen.cljc:289
+  (testing "gen.cljc:289" (eval (quote (clojure.test/is (= (rct-clr.rct-generated-test/eval-expectation (quote (quote (test-output-ns/bind-repl-vars! (def x 1))))) (rct-clr.rct-generated-test/bind-repl-vars! (datum->form {:expectation-type nil, :test-sexpr (quote (def x 1))} (quote rct-clr.gen) (quote test-output-ns))))))))
+  ;; gen.cljc:296
+  (testing "gen.cljc:296" (eval (quote (clojure.test/is (= (rct-clr.rct-generated-test/eval-expectation (quote (quote (clojure.test/is (= 3 (test-output-ns/bind-repl-vars! (+ 1 2))))))) (rct-clr.rct-generated-test/bind-repl-vars! (datum->form {:expectation-type (quote =>), :test-sexpr (quote (+ 1 2)), :expectation-string "3"} (quote rct-clr.gen) (quote test-output-ns))))))))
+  ;; gen.cljc:304
+  (testing "gen.cljc:304" (eval (quote (clojure.test/is (= (rct-clr.rct-generated-test/eval-expectation (quote (quote (clojure.test/is (= (test-output-ns/eval-expectation (quote (:h :c :s :d nil))) (test-output-ns/bind-repl-vars! (order))))))) (rct-clr.rct-generated-test/bind-repl-vars! (datum->form {:expectation-type (quote =>), :test-sexpr (quote (order)), :expectation-string "(:h :c :s :d nil)"} (quote rct-clr.gen) (quote test-output-ns))))))))
+  ;; gen.cljc:312
+  (testing "gen.cljc:312" (eval (quote (clojure.test/is (= (rct-clr.rct-generated-test/eval-expectation (quote (quote (matcho.core/assert {:status 200} (test-output-ns/bind-repl-vars! (get-status)))))) (rct-clr.rct-generated-test/bind-repl-vars! (datum->form {:expectation-type (quote =>>), :test-sexpr (quote (get-status)), :expectation-string "{:status 200}"} (quote rct-clr.gen) (quote test-output-ns))))))))
+  ;; gen.cljc:320
+  (testing "gen.cljc:320" (eval (quote (clojure.test/is (= (rct-clr.rct-generated-test/eval-expectation (quote (quote (matcho.core/assert [0 1] (test-output-ns/bind-repl-vars! (range 5)))))) (rct-clr.rct-generated-test/bind-repl-vars! (datum->form {:expectation-type (quote =>>), :test-sexpr (quote (range 5)), :expectation-string "[0 1 ...]"} (quote rct-clr.gen) (quote test-output-ns))))))))
+  ;; gen.cljc:328
+  (testing "gen.cljc:328" (eval (quote (clojure.test/is (= (rct-clr.rct-generated-test/eval-expectation (quote (quote (try (boom!) (clojure.test/is false "Expected exception") (catch System.Exception e (set! *e e) (matcho.core/assert #:error{:class Exception} (test-output-ns/error->map e))))))) (rct-clr.rct-generated-test/bind-repl-vars! (datum->form {:expectation-type (quote throws=>>), :test-sexpr (quote (boom!)), :expectation-string "{:error/class Exception}"} (quote rct-clr.gen) (quote test-output-ns))))))))
+  ;; gen.cljc:342
+  (testing "gen.cljc:342" (eval (quote (clojure.test/is (= (rct-clr.rct-generated-test/eval-expectation (quote (quote (clojure.test/is (= :clr (test-output-ns/bind-repl-vars! (get-platform))))))) (rct-clr.rct-generated-test/bind-repl-vars! (datum->form {:expectation-type (quote =>), :test-sexpr (quote (get-platform)), :expectation-string "#?(:clj :jvm :cljr :clr)"} (quote rct-clr.gen) (quote test-output-ns))))))))
+  ;; gen.cljc:350
+  (testing "gen.cljc:350" (eval (quote (clojure.test/is (= (rct-clr.rct-generated-test/eval-expectation (quote (quote (clojure.test/is (= :rct-clr.gen/foo (test-output-ns/bind-repl-vars! (get-type))))))) (rct-clr.rct-generated-test/bind-repl-vars! (datum->form {:expectation-type (quote =>), :test-sexpr (quote (get-type)), :expectation-string "::foo"} (quote rct-clr.gen) (quote test-output-ns)))))))))
 (defn- rct-clr-gen-rct-block-5 []
-  ;; gen.cljc:367
-  (testing "gen.cljc:367" (eval (quote (clojure.test/is (= "my-cool-namespace" (rct-clr.rct-generated-test/bind-repl-vars! (ns-sym->test-base (quote my.cool.namespace))))))))
-  ;; gen.cljc:370
-  (testing "gen.cljc:370" (eval (quote (clojure.test/is (= "single" (rct-clr.rct-generated-test/bind-repl-vars! (ns-sym->test-base (quote single)))))))))
+  ;; gen.cljc:365
+  (testing "gen.cljc:365" (eval (quote (clojure.test/is (= "my-cool-namespace" (rct-clr.rct-generated-test/bind-repl-vars! (ns-sym->test-base (quote my.cool.namespace))))))))
+  ;; gen.cljc:368
+  (testing "gen.cljc:368" (eval (quote (clojure.test/is (= "single" (rct-clr.rct-generated-test/bind-repl-vars! (ns-sym->test-base (quote single)))))))))
 (defn- rct-clr-gen-rct-block-6 []
-  ;; gen.cljc:493
-  (testing "gen.cljc:493" (eval (quote (clojure.test/is (= {:ok {:src-dirs ["src"], :output "out.cljc", :namespace "my.ns"}} (rct-clr.rct-generated-test/bind-repl-vars! (validate-opts ["-o" "out.cljc" "-n" "my.ns"])))))))
-  ;; gen.cljc:497
-  (testing "gen.cljc:497" (eval (quote (clojure.test/is (= {:ok {:src-dirs ["src1" "src2"], :output "out.cljc", :namespace "my.ns"}} (rct-clr.rct-generated-test/bind-repl-vars! (validate-opts ["-s" "src1" "-s" "src2" "-o" "out.cljc" "-n" "my.ns"])))))))
-  ;; gen.cljc:501
-  (testing "gen.cljc:501" (eval (quote (clojure.test/is (= {:errors ["Must provide --output / -o"]} (rct-clr.rct-generated-test/bind-repl-vars! (validate-opts ["-n" "my.ns"])))))))
-  ;; gen.cljc:505
-  (testing "gen.cljc:505" (eval (quote (clojure.test/is (= {:errors ["Must provide --namespace / -n"]} (rct-clr.rct-generated-test/bind-repl-vars! (validate-opts ["-o" "out.cljc"])))))))
-  ;; gen.cljc:509
-  (testing "gen.cljc:509" (eval (quote (clojure.test/is (= {:errors ["Must provide --output / -o" "Must provide --namespace / -n"]} (rct-clr.rct-generated-test/bind-repl-vars! (validate-opts [])))))))
+  ;; gen.cljc:490
+  (testing "gen.cljc:490" (eval (quote (clojure.test/is (= {:ok {:src-dirs ["src"], :output "out.cljc", :namespace "my.ns"}} (rct-clr.rct-generated-test/bind-repl-vars! (validate-opts ["-o" "out.cljc" "-n" "my.ns"])))))))
+  ;; gen.cljc:494
+  (testing "gen.cljc:494" (eval (quote (clojure.test/is (= {:ok {:src-dirs ["src1" "src2"], :output "out.cljc", :namespace "my.ns"}} (rct-clr.rct-generated-test/bind-repl-vars! (validate-opts ["-s" "src1" "-s" "src2" "-o" "out.cljc" "-n" "my.ns"])))))))
+  ;; gen.cljc:498
+  (testing "gen.cljc:498" (eval (quote (clojure.test/is (= {:errors ["Must provide --output / -o"]} (rct-clr.rct-generated-test/bind-repl-vars! (validate-opts ["-n" "my.ns"])))))))
+  ;; gen.cljc:502
+  (testing "gen.cljc:502" (eval (quote (clojure.test/is (= {:errors ["Must provide --namespace / -n"]} (rct-clr.rct-generated-test/bind-repl-vars! (validate-opts ["-o" "out.cljc"])))))))
+  ;; gen.cljc:506
+  (testing "gen.cljc:506" (eval (quote (clojure.test/is (= {:errors ["Must provide --output / -o" "Must provide --namespace / -n"]} (rct-clr.rct-generated-test/bind-repl-vars! (validate-opts [])))))))
+  ;; gen.cljc:510
+  (testing "gen.cljc:510" (eval (quote (clojure.test/is (= true (rct-clr.rct-generated-test/bind-repl-vars! (contains? (validate-opts ["--bogus"]) :errors)))))))
   ;; gen.cljc:513
-  (testing "gen.cljc:513" (eval (quote (clojure.test/is (= true (rct-clr.rct-generated-test/bind-repl-vars! (contains? (validate-opts ["--bogus"]) :errors)))))))
-  ;; gen.cljc:516
-  (testing "gen.cljc:516" (eval (quote (clojure.test/is (= true (rct-clr.rct-generated-test/bind-repl-vars! (contains? (validate-opts ["-h"]) :help))))))))
+  (testing "gen.cljc:513" (eval (quote (clojure.test/is (= true (rct-clr.rct-generated-test/bind-repl-vars! (contains? (validate-opts ["-h"]) :help))))))))
 (deftest rct-clr-gen-rct
   (binding [*ns* (the-ns 'rct-clr.gen)
             *1 nil, *2 nil, *3 nil, *e nil]

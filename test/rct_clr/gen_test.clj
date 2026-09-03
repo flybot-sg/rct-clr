@@ -17,7 +17,7 @@
           (recur (conj forms form)))))))
 
 (defn- assert-parseable
-  "Assert s is valid Clojure — all forms readable, at least one present."
+  "Assert s is valid Clojure: all forms readable, at least one present."
   [s]
   (let [forms (read-all-forms s)]
     (is (pos? (count forms)) "expected at least one readable form")
@@ -325,7 +325,7 @@
         (try
           (gen/generate {:src-dirs src-dirs :output (str tmp) :namespace ns-str})
           (is (= (slurp golden-path) (slurp tmp))
-              "generated output has changed — run bb gen-clr-rct to update golden files")
+              "generated output has changed, run bb gen-clr-rct to update golden files")
           (finally
             (.delete tmp)))))))
 

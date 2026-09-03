@@ -151,14 +151,14 @@
 
 ;; rct-clr.sample-clr
 (defn- rct-clr-sample-clr-rct-block-0 []
-  ;; sample_clr.cljc:14
-  (testing "sample_clr.cljc:14" (eval (quote (clojure.test/is (= "boom" (rct-clr.sample-generated-test/bind-repl-vars! (.Message (make-error "boom"))))))))
-  ;; sample_clr.cljc:18
-  (testing "sample_clr.cljc:18" (eval (quote (clojure.test/is (= "boom" (rct-clr.sample-generated-test/bind-repl-vars! (.Message (make-error "boom"))))))))
-  ;; sample_clr.cljc:22
-  (testing "sample_clr.cljc:22" (eval (quote (clojure.test/is (= :clr (rct-clr.sample-generated-test/bind-repl-vars! :clr))))))
-  ;; sample_clr.cljc:26
-  (testing "sample_clr.cljc:26" (eval (quote (clojure.test/is (= "error: boom" (rct-clr.sample-generated-test/bind-repl-vars! (str "error: " (.Message (make-error "boom"))))))))))
+  ;; sample_clr.cljc:13
+  (testing "sample_clr.cljc:13" (eval (quote (clojure.test/is (= "boom" (rct-clr.sample-generated-test/bind-repl-vars! (.Message (make-error "boom"))))))))
+  ;; sample_clr.cljc:17
+  (testing "sample_clr.cljc:17" (eval (quote (clojure.test/is (= "boom" (rct-clr.sample-generated-test/bind-repl-vars! (.Message (make-error "boom"))))))))
+  ;; sample_clr.cljc:21
+  (testing "sample_clr.cljc:21" (eval (quote (clojure.test/is (= :clr (rct-clr.sample-generated-test/bind-repl-vars! :clr))))))
+  ;; sample_clr.cljc:25
+  (testing "sample_clr.cljc:25" (eval (quote (clojure.test/is (= "error: boom" (rct-clr.sample-generated-test/bind-repl-vars! (str "error: " (.Message (make-error "boom"))))))))))
 (deftest rct-clr-sample-clr-rct
   (binding [*ns* (the-ns 'rct-clr.sample-clr)
             *1 nil, *2 nil, *3 nil, *e nil]
