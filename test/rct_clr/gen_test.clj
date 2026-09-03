@@ -158,7 +158,8 @@
 (deftest write-deftest-empty-blocks-test
   (let [sw (java.io.StringWriter.)
         expected (str "(deftest some-ns-rct\n"
-                      "  (binding [*ns* (the-ns 'some.ns)]))\n\n")]
+                      "  (binding [*ns* (the-ns 'some.ns)\n"
+                      "            *1 nil, *2 nil, *3 nil, *e nil]))\n\n")]
     (gen/write-deftest sw 'some.ns [])
     (is (= expected (str sw)))))
 
@@ -234,7 +235,7 @@
         out (write-block-output block-data "meta.cljc")
         expected (str "(defn- meta-block-0 []\n"
                       "  ;; meta.cljc:5\n"
-                      "  (testing \"meta.cljc:5\" (eval (quote (matcho.core/assert ^#:matcho{:strict true} [1 2 3] (get-items))))))\n")]
+                      "  (testing \"meta.cljc:5\" (eval (quote (matcho.core/assert ^#:matcho{:strict true} [1 2 3] (test.output/bind-repl-vars! (get-items)))))))\n")]
     (is (= expected out))))
 
 ;; ---------------------------------------------------------------------------

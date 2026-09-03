@@ -259,36 +259,40 @@
 
 (defn datum->form
   "Convert an RCT datum to a Clojure form for the generated test.
-  A => expectation that is not self-evaluating goes through eval-expectation at
-  test time, so an earlier form's defs are in place by the time it evaluates."
+  Value-producing forms pass through bind-repl-vars! so a later form in the
+  same block can chain off *1. A => expectation that is not self-evaluating goes
+  through eval-expectation at test time, so an earlier form's defs are in place
+  by the time it evaluates."
   [{:keys [test-sexpr expectation-type] :as datum} ns-sym output-ns]
   (let [error->map-sym (symbol (str output-ns) "error->map")
         eval-sym (symbol (str output-ns) "eval-expectation")
-        expectation (read-expectation datum ns-sym)]
+        expectation (read-expectation datum ns-sym)
+        bound-sexpr (list (symbol (str output-ns) "bind-repl-vars!") test-sexpr)]
     (case expectation-type
-      ;; nil = side-effect form (def, require), emit raw
-      nil test-sexpr
+      ;; nil = side-effect form (def, require)
+      nil bound-sexpr
       => (list 'clojure.test/is
                (list '= (if (self-evaluating? expectation)
                           expectation
                           (list eval-sym (list 'quote expectation)))
-                     test-sexpr))
-      =>> (list 'matcho.core/assert expectation test-sexpr)
+                     bound-sexpr))
+      =>> (list 'matcho.core/assert expectation bound-sexpr)
       throws=>> (list 'try test-sexpr
                       (list 'clojure.test/is false "Expected exception")
                       (list 'catch 'System.Exception 'e
+                            (list 'set! '*e 'e)
                             (list 'matcho.core/assert
                                   expectation
                                   (list error->map-sym 'e)))))))
 
 ^:rct/test
 (comment
-  ;; nil expectation: side-effect, returns raw expression
+  ;; nil expectation: side-effect, wrapped so it feeds *1
   (datum->form {:test-sexpr '(def x 1)
                 :expectation-type nil}
                'rct-clr.gen
                'test-output-ns)
-  ;=> '(def x 1)
+  ;=> '(test-output-ns/bind-repl-vars! (def x 1))
 
   ;; => expectation: equality assertion
   (datum->form {:test-sexpr '(+ 1 2)
@@ -296,7 +300,7 @@
                 :expectation-type '=>}
                'rct-clr.gen
                'test-output-ns)
-  ;=> '(clojure.test/is (= 3 (+ 1 2)))
+  ;=> '(clojure.test/is (= 3 (test-output-ns/bind-repl-vars! (+ 1 2))))
 
   ;; => a non-self-evaluating expectation is handed to eval-expectation
   (datum->form {:test-sexpr '(order)
@@ -304,15 +308,15 @@
                 :expectation-type '=>}
                'rct-clr.gen
                'test-output-ns)
-  ;=> '(clojure.test/is (= (test-output-ns/eval-expectation (quote (:h :c :s :d nil))) (order)))
+  ;=> '(clojure.test/is (= (test-output-ns/eval-expectation (quote (:h :c :s :d nil))) (test-output-ns/bind-repl-vars! (order))))
 
-  ;; =>> expectation: matcho pattern
+  ;; =>> expectation: matcho pattern, kept as code
   (datum->form {:test-sexpr '(get-status)
                 :expectation-string "{:status 200}"
                 :expectation-type '=>>}
                'rct-clr.gen
                'test-output-ns)
-  ;=> '(matcho.core/assert {:status 200} (get-status))
+  ;=> '(matcho.core/assert {:status 200} (test-output-ns/bind-repl-vars! (get-status)))
 
   ;; =>> with ellipsis elision
   (datum->form {:test-sexpr '(range 5)
@@ -320,9 +324,9 @@
                 :expectation-type '=>>}
                'rct-clr.gen
                'test-output-ns)
-  ;=> '(matcho.core/assert [0 1] (range 5))
+  ;=> '(matcho.core/assert [0 1] (test-output-ns/bind-repl-vars! (range 5)))
 
-  ;; throws=>>: full try/catch structure with qualified error->map
+  ;; throws=>>: try/catch, binds *e, qualified error->map
   (datum->form {:test-sexpr '(boom!)
                 :expectation-string "{:error/class Exception}"
                 :expectation-type 'throws=>>}
@@ -332,6 +336,7 @@
   '(try (boom!)
         (clojure.test/is false "Expected exception")
         (catch System.Exception e
+          (set! *e e)
           (matcho.core/assert {:error/class Exception}
                               (test-output-ns/error->map e))))
 
@@ -341,7 +346,7 @@
                 :expectation-type '=>}
                'rct-clr.gen
                'test-output-ns)
-  ;=> '(clojure.test/is (= :clr (get-platform)))
+  ;=> '(clojure.test/is (= :clr (test-output-ns/bind-repl-vars! (get-platform))))
 
   ;; => with namespace-qualified keyword in expectation
   (datum->form {:test-sexpr '(get-type)
@@ -349,7 +354,7 @@
                 :expectation-type '=>}
                'rct-clr.gen
                'test-output-ns)
-  ;=> '(clojure.test/is (= :rct-clr.gen/foo (get-type)))
+  ;=> '(clojure.test/is (= :rct-clr.gen/foo (test-output-ns/bind-repl-vars! (get-type))))
   )
 
 (defn ns-sym->test-base
@@ -396,15 +401,18 @@
 
 (defn write-deftest
   "Write a deftest that calls block fns in order.
-  Binds *ns* to the source namespace so eval'd forms resolve there."
+  Binds *ns* to the source namespace so eval'd forms resolve there, and the
+  REPL vars so bind-repl-vars! has a thread-local to set!."
   [w ns-sym block-infos]
   (let [test-sym (str (ns-sym->test-base ns-sym) "-rct")
         calls (mapv #(str "(" (:fn-sym %) ")") block-infos)]
     (.write w (str "(deftest " test-sym "\n"))
     (if (empty? calls)
-      (.write w (str "  (binding [*ns* (the-ns '" ns-sym ")]))\n\n"))
+      (.write w (str "  (binding [*ns* (the-ns '" ns-sym ")\n"
+                     "            *1 nil, *2 nil, *3 nil, *e nil]))\n\n"))
       (do
-        (.write w (str "  (binding [*ns* (the-ns '" ns-sym ")]\n"))
+        (.write w (str "  (binding [*ns* (the-ns '" ns-sym ")\n"
+                       "            *1 nil, *2 nil, *3 nil, *e nil]\n"))
         (.write w (str "    " (string/join "\n    " calls) "))\n\n"))))))
 
 (def ^:private error->map-str
@@ -428,8 +436,17 @@
     (catch #?(:clj Exception :cljr System.Exception) _
       form)))")
 
+(def ^:private bind-repl-vars-str
+  "bind-repl-vars! carries a form's value into *1 so a later form in the same
+  block can chain off it, as RCT does. write-deftest binds the vars."
+  "(defn bind-repl-vars! [result]
+  (set! *3 *2)
+  (set! *2 *1)
+  (set! *1 result)
+  result)")
+
 (defn write-preamble
-  "Write the ns form and the error->map and eval-expectation helpers.
+  "Write the ns form and the error->map, eval-expectation and bind-repl-vars! helpers.
   The ns is tagged ^:clr-only so Kaocha skips it on the JVM."
   [w output-ns ns-syms]
   (let [requires (sort ns-syms)
@@ -442,7 +459,8 @@
                    (string/join "\n" req-lines) "))\n"
                    "\n"
                    error->map-str "\n\n"
-                   eval-expectation-str "\n\n"))))
+                   eval-expectation-str "\n\n"
+                   bind-repl-vars-str "\n\n"))))
 
 (def cli-options
   [["-s" "--src-dir DIR" "Source directory to scan (repeatable, default: src)"
