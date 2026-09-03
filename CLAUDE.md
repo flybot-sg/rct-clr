@@ -25,8 +25,9 @@ bb rct
 # Run tests filtered by metadata
 clojure -M:dev:test --focus-meta :rct         # RCT tests only
 
-# Run CLR tests via Nostrand (regenerates golden files, then runs on Magic)
-bb clr-test
+# Run CLR tests (regenerates golden files, then runs on MAGIC / ClojureCLR)
+bb magic-test
+bb cljr-test
 
 # Generate CLR-compatible golden files from ^:rct/test blocks
 bb gen-clr-rct
@@ -64,7 +65,8 @@ Generated tests use `eval` with `*ns*` binding for namespace isolation.
 - `examples_jvm/` — JVM-only interop tests (e.g. `.getMessage`); scanned by the RCT runner only (the generator would emit JVM interop in CLR output)
 
 **CLR-specific files:**
-- `dotnet.clj` — CLR entry points for `nos` (build, run-tests); exits non-zero on test failures. Deps resolve from `deps.edn` (the `:clr` alias overrides matcho with the MAGIC fork)
+- `deps-clr.edn` — CLR coordinates, read by both `nos` and `cljr` in place of `deps.edn`
+- `magic.edn` — `nos test` configuration; excludes the JVM-only test namespaces
 
 ## Test Configuration
 

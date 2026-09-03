@@ -10,7 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/flybot-sg/ci-clj-clr:2.1.0
+      image: ghcr.io/flybot-sg/ci-clj-clr:2.7.1
     steps:
       - uses: actions/checkout@v7
 
@@ -36,5 +36,8 @@ jobs:
       - name: Run JVM tests
         run: bb jvm-test
 
-      - name: Run CLR tests
-        run: bb clr-test
+      - name: Run CLR tests (MAGIC)
+        run: bb magic-test
+
+      - name: Run CLR tests (ClojureCLR)
+        run: bb cljr-test
