@@ -125,14 +125,25 @@ Add as a dev dependency:
 
 Since `rct-clr` transitively brings in `rich-comment-tests`, you can remove any existing direct RCT dependency from your `deps.edn`.
 
-Nostrand resolves dependencies from `deps.edn` directly. The generated tests use `matcho.core/assert` for `=>>` patterns, so add a `:clr` alias that swaps the JVM matcho (pulled transitively by `rich-comment-tests`) for the [MAGIC fork](https://github.com/flybot-sg/matcho/tree/magic):
+#### deps-clr.edn
+
+`nos` and `cljr` read `deps-clr.edn` in place of `deps.edn`, so the CLR coordinates live there. The generated tests call `matcho.core/assert` for `=>>` patterns, so declare matcho, and the ClojureCLR test runner to drive `cljr -X:test`:
 
 ```clojure
-{:aliases
- {:clr {:override-deps {healthsamurai/matcho
-                        {:git/url "https://github.com/flybot-sg/matcho"
-                         :git/sha "31225e185d5bbc2f13529730865bf9563677e646"}}}}}
+{:paths ["src"]
+ :aliases
+ {:test {:extra-paths ["test"]
+         :extra-deps  {io.github.dmiller/test-runner {:git/tag "v0.5.3clr"
+                                                      :git/sha "ae91dd2727bbf70eb3a6d869a19953de3819dfbc"}
+                       flybot-sg/matcho              {:git/url "https://github.com/flybot-sg/matcho"
+                                                      :git/sha "fba2a65485f4d5b1e0a69f94a3d06c467478f53f"}}
+         :exec-fn     cognitect.test-runner.api/test
+         ;; the JVM-only RCT runner lives in test/ too, and cljr would load it
+         :exec-args   {:dirs     ["test"]
+                       :patterns ["my-project\\.(?!rc-test$).*"]}}}}
 ```
+
+Pin matcho's `clr-support` branch, not `master`: only that branch ships a `deps-clr.edn`, without which `cljr` cannot resolve it.
 
 #### `bb.edn` - generating CLR test file
 
@@ -141,8 +152,18 @@ If you use Babashka to run scripts, you can do this too:
 ```clojure
 {:tasks {gen-clr-rct
          {:doc  "Generate CLR-compatible RCT test file"
-          :task (clojure "-M:dev -m rct-clr.gen -o test/my_project/rct_generated_test.cljc -n my-project.rct-generated-test")}}}
+          ;; -M:dev, not -M:dev:test: a :test alias carrying kaocha's :main-opts
+          ;; would shadow -m rct-clr.gen
+          :task (clojure "-M:dev -m rct-clr.gen -o test/my_project/rct_generated_test.cljc -n my-project.rct-generated-test")}
+         magic-test
+         {:doc  "Regenerate the RCT test file and run the CLR tests on MAGIC"
+          :task (do (run 'gen-clr-rct) (shell "nos" "test"))}
+         cljr-test
+         {:doc  "Regenerate the RCT test file and run the CLR tests on ClojureCLR"
+          :task (do (run 'gen-clr-rct) (shell "cljr" "-X:test"))}}}
 ```
+
+Run those two in CI rather than bare `nos test` / `cljr -X:test`, so the generated file cannot go stale.
 
 ### JVM testing setup
 
@@ -183,14 +204,12 @@ To run only the RCT tests on JVM without running the full test suite:
           :task (clojure "-M:dev:test --focus :rct")}}}
 ```
 
-### dotnet.clj
+### magic.edn
 
-Add the generated test namespace to your `test-namespaces`. Also exit non-zero on test failures — `clojure.test/run-all-tests` returns a result map but doesn't set the exit code, so without this Nostrand exits 0 even when tests fail:
+`nos test` derives its namespaces from the source paths, which picks up the JVM-only RCT runner as well. Exclude it:
 
 ```clojure
-(let [{:keys [fail error]} (run-all-tests)]
-  (when (or (pos? fail) (pos? error))
-    (Environment/Exit 1)))
+{:test {:exclude [my-project.rc-test]}}
 ```
 
 ### .gitignore

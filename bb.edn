@@ -24,7 +24,11 @@
          outdated
          {:doc "Show outdated dependencies"
           :task (clojure "-M:outdated")}
-         clr-test
-         {:doc  "Run all CLR tests (build dir cleaned by nostrand's :clean?)"
+         magic-test
+         {:doc  "Regenerate golden files and run the CLR tests on MAGIC"
           :task (do (run 'gen-clr-rct)
-                    (shell "nos" "dotnet/run-tests"))}}}
+                    (shell "nos" "test"))}
+         cljr-test
+         {:doc  "Regenerate golden files and run the CLR tests on ClojureCLR"
+          :task (do (run 'gen-clr-rct)
+                    (shell "cljr" "-X:test"))}}}

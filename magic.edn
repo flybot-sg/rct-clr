@@ -1,0 +1,6 @@
+;; What `nos test` does differently from its defaults.
+;; Full surface: https://github.com/flybot-sg/magic/blob/main/docs/nos-cli.md
+{:test {;; JVM-only: these need rich-comment-tests, kaocha and rct-clr.gen
+        :exclude [rct-clr.rc-test
+                  rct-clr.gen-test
+                  rct-clr.rct-generated-test]}}
