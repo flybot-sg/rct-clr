@@ -10,6 +10,7 @@
                                                         :git/sha "31225e185d5bbc2f13529730865bf9563677e646"}}}
            :dev  {:extra-paths ["dev" "test" "examples" "examples_clr" "examples_jvm"]
                   :extra-deps  {cider/cider-nrepl {:mvn/version "0.58.0"}
+                                nrepl/nrepl {:mvn/version "1.7.0"}
                                 lambdaisland/kaocha {:mvn/version "1.91.1392"}}}
            :test {:extra-paths ["test" "examples" "examples_clr" "examples_jvm"]
                   :extra-deps  {lambdaisland/kaocha {:mvn/version "1.91.1392"}
