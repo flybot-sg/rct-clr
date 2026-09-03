@@ -1,5 +1,5 @@
 {:paths ["src"]
- :deps {org.clojure/clojure {:mvn/version "1.12.4"}
+ :deps {org.clojure/clojure {:mvn/version "1.12.6"}
         io.github.robertluo/rich-comment-tests
         {:git/url "https://github.com/robertluo/rich-comment-tests"
          :git/sha "6765d3b73a9602aa38b1ad63af889c8c7b47c1d0"}
@@ -9,17 +9,17 @@
            :clr  {:override-deps {healthsamurai/matcho {:git/url "https://github.com/flybot-sg/matcho"
                                                         :git/sha "31225e185d5bbc2f13529730865bf9563677e646"}}}
            :dev  {:extra-paths ["dev" "test" "examples" "examples_clr" "examples_jvm"]
-                  :extra-deps  {cider/cider-nrepl {:mvn/version "0.58.0"}
+                  :extra-deps  {cider/cider-nrepl {:mvn/version "0.62.2"}
                                 nrepl/nrepl {:mvn/version "1.7.0"}
                                 lambdaisland/kaocha {:mvn/version "1.91.1392"}}}
            :test {:extra-paths ["test" "examples" "examples_clr" "examples_jvm"]
                   :extra-deps  {lambdaisland/kaocha {:mvn/version "1.91.1392"}
                                 lambdaisland/kaocha-cloverage {:mvn/version "1.1.89"}}
                   :main-opts   ["-m" "kaocha.runner"]}
-           :dbg {:extra-deps {com.github.flow-storm/clojure {:mvn/version "1.12.4"}
-                              com.github.flow-storm/flow-storm-dbg {:mvn/version "4.5.9"}}}
+           :dbg {:extra-deps {com.github.flow-storm/clojure {:mvn/version "1.12.5-1"}
+                              com.github.flow-storm/flow-storm-dbg {:mvn/version "4.8.1"}}}
            :outdated {:deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}
                       :main-opts ["-m" "antq.core"]}
            :cljfmt
-           {:deps {io.github.weavejester/cljfmt {:git/tag "0.16.3" :git/sha "f138389"}}
+           {:deps {io.github.weavejester/cljfmt {:git/tag "0.16.5" :git/sha "609d570"}}
             :ns-default cljfmt.tool}}}
