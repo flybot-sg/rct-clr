@@ -34,6 +34,33 @@
   ;=> 21
   )
 
+;; --- Seq-valued and symbol expectations ---
+
+(defn suits []
+  (list :h :c :s :d))
+
+(defn a-symbol []
+  'foo)
+
+^:rct/test
+(comment
+  ;; a keyword-headed list cannot be called, so it compares as data
+  (suits)
+  ;=> (:h :c :s :d)
+
+  ;; a number in head position, the value-type case
+  (map inc (range 3))
+  ;=> (1 2 3)
+
+  ;; a symbol compares as a symbol, it is not resolved
+  (a-symbol)
+  ;=> foo
+
+  ;; an expectation that does evaluate keeps its value
+  (count (suits))
+  ;=> (+ 2 2)
+  )
+
 ;; --- String operations and alias-qualified calls ---
 
 (defn greet [name]

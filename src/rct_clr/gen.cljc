@@ -153,8 +153,45 @@
                      block)))
          (filter seq))))
 
+(defn self-evaluating?
+  "True when x can be emitted into code position as-is. A seq evaluates as a
+  call and a symbol as a var reference, so a collection is self-evaluating only
+  when every element is."
+  [x]
+  (cond
+    (or (seq? x) (symbol? x)) false
+    (coll? x) (every? self-evaluating? x)
+    :else true))
+
+^:rct/test
+(comment
+  (self-evaluating? 42)
+  ;=> true
+
+  ;; a seq evaluates as a call
+  (self-evaluating? '(:h :c :s))
+  ;=> false
+
+  ;; a symbol evaluates as a var reference
+  (self-evaluating? 'foo)
+  ;=> false
+
+  (self-evaluating? [1 2 3])
+  ;=> true
+
+  ;; a collection is only as safe as its elements, map entries included
+  (self-evaluating? '{:a (1 2)})
+  ;=> false
+
+  (self-evaluating? [])
+  ;=> true
+  )
+
 (defn read-expectation
-  "Read expectation string into a form, handling ellipses for =>>."
+  "Read expectation string into a form, handling ellipses for =>>.
+  Returns the datum unevaluated: RCT evaluates an expectation at test time, and
+  datum->form emits that evaluation into the generated file rather than running
+  it here, so generation stays a pure function of the source."
   [{:keys [expectation-string expectation-type]} ns-sym]
   (when expectation-string
     (let [s (if (= '=>> expectation-type)
@@ -182,6 +219,12 @@
                      :expectation-type '=>}
                     'rct-clr.gen)
   ;=> nil
+
+  ;; a list expectation is not evaluated here
+  (read-expectation {:expectation-string "(+ 1 2)"
+                     :expectation-type '=>}
+                    'rct-clr.gen)
+  ;=> '(+ 1 2)
 
   ;; reader conditional resolves to :cljr branch
   (read-expectation {:expectation-string "#?(:clj :jvm :cljr :clr)"
@@ -215,21 +258,27 @@
   )
 
 (defn datum->form
-  "Convert an RCT datum to a Clojure form for the generated test."
+  "Convert an RCT datum to a Clojure form for the generated test.
+  A => expectation that is not self-evaluating goes through eval-expectation at
+  test time, so an earlier form's defs are in place by the time it evaluates."
   [{:keys [test-sexpr expectation-type] :as datum} ns-sym output-ns]
-  (let [error->map-sym (symbol (str output-ns) "error->map")]
+  (let [error->map-sym (symbol (str output-ns) "error->map")
+        eval-sym (symbol (str output-ns) "eval-expectation")
+        expectation (read-expectation datum ns-sym)]
     (case expectation-type
       ;; nil = side-effect form (def, require), emit raw
       nil test-sexpr
       => (list 'clojure.test/is
-               (list '= (read-expectation datum ns-sym) test-sexpr))
-      =>> (list 'matcho.core/assert
-                (read-expectation datum ns-sym) test-sexpr)
+               (list '= (if (self-evaluating? expectation)
+                          expectation
+                          (list eval-sym (list 'quote expectation)))
+                     test-sexpr))
+      =>> (list 'matcho.core/assert expectation test-sexpr)
       throws=>> (list 'try test-sexpr
                       (list 'clojure.test/is false "Expected exception")
                       (list 'catch 'System.Exception 'e
                             (list 'matcho.core/assert
-                                  (read-expectation datum ns-sym)
+                                  expectation
                                   (list error->map-sym 'e)))))))
 
 ^:rct/test
@@ -248,6 +297,14 @@
                'rct-clr.gen
                'test-output-ns)
   ;=> '(clojure.test/is (= 3 (+ 1 2)))
+
+  ;; => a non-self-evaluating expectation is handed to eval-expectation
+  (datum->form {:test-sexpr '(order)
+                :expectation-string "(:h :c :s :d nil)"
+                :expectation-type '=>}
+               'rct-clr.gen
+               'test-output-ns)
+  ;=> '(clojure.test/is (= (test-output-ns/eval-expectation (quote (:h :c :s :d nil))) (order)))
 
   ;; =>> expectation: matcho pattern
   (datum->form {:test-sexpr '(get-status)
@@ -361,8 +418,18 @@
    :error/message #?(:clj (.getMessage e) :cljr (.Message e))
    :error/data (ex-data e)})")
 
+(def ^:private eval-expectation-str
+  "eval-expectation reproduces RCT's expectation handling: evaluate the form,
+  and compare against the form itself when evaluating it throws, which is what
+  makes a data-valued list compare as data."
+  "(defn eval-expectation [form]
+  (try
+    (eval form)
+    (catch #?(:clj Exception :cljr System.Exception) _
+      form)))")
+
 (defn write-preamble
-  "Write the ns form and error->map helper.
+  "Write the ns form and the error->map and eval-expectation helpers.
   The ns is tagged ^:clr-only so Kaocha skips it on the JVM."
   [w output-ns ns-syms]
   (let [requires (sort ns-syms)
@@ -374,7 +441,8 @@
                    "            [matcho.core]\n"
                    (string/join "\n" req-lines) "))\n"
                    "\n"
-                   error->map-str "\n\n"))))
+                   error->map-str "\n\n"
+                   eval-expectation-str "\n\n"))))
 
 (def cli-options
   [["-s" "--src-dir DIR" "Source directory to scan (repeatable, default: src)"

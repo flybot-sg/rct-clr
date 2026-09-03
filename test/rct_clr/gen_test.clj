@@ -280,7 +280,7 @@
         datums (mapcat identity blocks)
         valid-types #{nil '=> '=>> 'throws=>>}]
     (testing "finds all RCT blocks"
-      (is (= 6 (count blocks))))
+      (is (= 7 (count blocks))))
     (testing "every block is a non-empty seq"
       (is (every? seq blocks)))
     (testing "first block is build-resolver with exact test-sexpr"
