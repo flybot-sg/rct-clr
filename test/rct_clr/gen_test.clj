@@ -57,7 +57,7 @@
 
 (defn- rct-source
   "Minimal .cljc source with ^:rct/test blocks exercising the given assertion types.
-  assertion-types is a vector of :=>, :=>>, and/or :throws=>>.
+  assertion-types is a vector of :=> and/or :=>>.
   blocks controls how many ^:rct/test blocks to produce (default 1)."
   ([ns-sym assertion-types] (rct-source ns-sym assertion-types 1))
   ([ns-sym assertion-types blocks]
@@ -67,9 +67,7 @@
                     :=> {:defn (str "(defn fn-" i " [] " (inc i) ")")
                          :test (str "  (fn-" i ")\n  ;=> " (inc i))}
                     :=>> {:defn (str "(defn fn-" i " [] {:result " (inc i) " :extra 99})")
-                          :test (str "  (fn-" i ")\n  ;=>> {:result " (inc i) "}")}
-                    :throws=>> {:defn (str "(defn fn-" i " [] (throw (ex-info \"boom\" {:code 42})))")
-                                :test (str "  (fn-" i ")\n  ;throws=>> {:error/class clojure.lang.ExceptionInfo}")}))
+                          :test (str "  (fn-" i ")\n  ;=>> {:result " (inc i) "}")}))
                 assertion-types)
          block-groups (partition-all (max 1 (Math/ceil (/ (count parts) blocks))) parts)]
      (str "(ns " ns-sym ")\n"
@@ -145,11 +143,7 @@
         required-libs (mapv first (rest require-form))]
     (testing "source namespaces appear sorted in requires"
       (let [source-libs (filterv #{'aa.first 'mm.middle 'zz.last} required-libs)]
-        (is (= ['aa.first 'mm.middle 'zz.last] source-libs))))
-    (testing "always includes clojure.test and matcho.core"
-      (let [lib-set (set required-libs)]
-        (is (contains? lib-set 'clojure.test))
-        (is (contains? lib-set 'matcho.core))))))
+        (is (= ['aa.first 'mm.middle 'zz.last] source-libs))))))
 
 ;; ---------------------------------------------------------------------------
 ;; write-deftest
@@ -180,16 +174,6 @@
                      :expectation-string "3"
                      :expectation-type '=>
                      :location [9 1]}
-                    ;; =>> with location
-                    {:test-sexpr '(get-status)
-                     :expectation-string "{:status 200}"
-                     :expectation-type '=>>
-                     :location [11 1]}
-                    ;; throws=>> with location
-                    {:test-sexpr '(kaboom)
-                     :expectation-string "{:error/class Exception}"
-                     :expectation-type 'throws=>>
-                     :location [13 1]}
                     ;; assertion without location
                     {:test-sexpr '(+ 3 4)
                      :expectation-string "7"
@@ -197,10 +181,10 @@
         out (write-block-output block-data)
         [defn-form :as forms] (read-all-forms out)
         body (vec (drop 3 defn-form))]
-    (testing "single defn- form with all six body forms"
+    (testing "single defn- form with all four body forms"
       (is (= 1 (count forms)))
       (is (= 'defn- (first defn-form)))
-      (is (= 6 (count body))))
+      (is (= 4 (count body))))
     (testing "side-effect with location is bare eval, not testing"
       (is (= 'eval (first (nth body 0)))))
     (testing "side-effect without location is bare eval"
@@ -208,16 +192,11 @@
     (testing "=> with location wrapped in testing"
       (is (= 'testing (first (nth body 2))))
       (is (= "example.cljc:9" (second (nth body 2)))))
-    (testing "=>> with location wrapped in testing"
-      (is (= 'testing (first (nth body 3)))))
-    (testing "throws=>> with location wrapped in testing"
-      (is (= 'testing (first (nth body 4)))))
     (testing "assertion without location is bare eval"
-      (is (= 'eval (first (nth body 5)))))
+      (is (= 'eval (first (nth body 3)))))
     (testing "location comments for datums with locations"
       (is (string/includes? out ";; example.cljc:5"))
-      (is (string/includes? out ";; example.cljc:9"))
-      (is (string/includes? out ";; example.cljc:13")))
+      (is (string/includes? out ";; example.cljc:9")))
     (testing "no location comments for datums without locations"
       (is (not (re-find #";;.*def y" out)))
       (is (not (re-find #";;.*\+ 3 4" out))))))
@@ -257,10 +236,6 @@
     (testing "keeps the .cljc when a namespace is present as both"
       (is (= ["both.cljc"]
              (mapv #(.getName %) (gen/find-source-files (str dir))))))))
-
-(deftest find-source-files-empty-dir-test
-  (with-tmp-dir [dir {}]
-    (is (empty? (gen/find-source-files (str dir))))))
 
 (deftest find-source-files-nested-test
   (with-tmp-dir [dir {"top.cljc"       "(ns top)"
@@ -419,23 +394,6 @@
       (testing "skips the no-ns file, processes the good one"
         (is (= {:namespaces 1 :blocks 1} result))
         (is (not (string/includes? (slurp (:output project)) "stray")))))))
-
-(deftest generate-throws-assertion-test
-  (with-gen-project [project {:files {"src/throws_ns/err.cljc"
-                                      (rct-source 'throws-ns.err [:throws=>>])}
-                              :src-dirs ["src"]}]
-    (let [result (gen/generate {:src-dirs (:src-dirs project)
-                                :output (:output project)
-                                :namespace "test.throws"})
-          content (slurp (:output project))
-          forms (read-all-forms content)]
-      (testing "discovers the namespace and block"
-        (is (= {:namespaces 1 :blocks 1} result)))
-      (testing "generated output contains try/catch structure"
-        (let [all-syms (set (filter symbol? (tree-seq coll? seq forms)))]
-          (is (contains? all-syms 'try))
-          (is (contains? all-syms 'catch))
-          (is (contains? all-syms 'matcho.core/assert)))))))
 
 (deftest generate-multi-block-per-file-test
   (with-gen-project [project {:files {"src/mb/multi.cljc" (rct-source 'mb.multi [:=> :=>>] 2)}

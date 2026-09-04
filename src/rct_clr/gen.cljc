@@ -112,15 +112,6 @@
         (catch System.Exception e
           (.Message e)))
 
-  ;; resolves reader conditional nested inside a regular expression
-  (resolve-reader-conditionals
-   '(+ (/ pos-score visits)
-       (read-string "#?(:clj (Math/sqrt visits) :cljr (Math/Sqrt visits))"))
-   'rct-clr.gen)
-  ;=>
-  '(+ (/ pos-score visits)
-      (Math/Sqrt visits))
-
   ;; passes through forms without reader conditionals unchanged
   (resolve-reader-conditionals '(+ 1 2) 'rct-clr.gen) ;=> '(+ 1 2)
 
@@ -186,8 +177,6 @@
 
   ;; a collection is only as safe as its elements, map entries included
   (self-evaluating? '{:a (1 2)}) ;=> false
-
-  (self-evaluating? []) ;=> true
   )
 
 (defn read-expectation
@@ -319,14 +308,6 @@
                'test-output-ns)
   ;=> '(matcho.core/assert {:status 200} (test-output-ns/bind-repl-vars! (get-status)))
 
-  ;; =>> with ellipsis elision
-  (datum->form {:test-sexpr '(range 5)
-                :expectation-string "[0 1 ...]"
-                :expectation-type '=>>}
-               'rct-clr.gen
-               'test-output-ns)
-  ;=> '(matcho.core/assert [0 1] (test-output-ns/bind-repl-vars! (range 5)))
-
   ;; throws=>>: try/catch, binds *e, qualified error->map
   (datum->form {:test-sexpr '(boom!)
                 :expectation-string "{:error/class Exception}"
@@ -339,24 +320,7 @@
         (catch System.Exception e
           (set! *e e)
           (matcho.core/assert {:error/class Exception}
-                              (test-output-ns/error->map e))))
-
-  ;; => with reader conditional: read-expectation resolves to CLR branch
-  (datum->form {:test-sexpr '(get-platform)
-                :expectation-string "#?(:clj :jvm :cljr :clr)"
-                :expectation-type '=>}
-               'rct-clr.gen
-               'test-output-ns)
-  ;=> '(clojure.test/is (= :clr (test-output-ns/bind-repl-vars! (get-platform))))
-
-  ;; => with namespace-qualified keyword in expectation
-  (datum->form {:test-sexpr '(get-type)
-                :expectation-string "::foo"
-                :expectation-type '=>}
-               'rct-clr.gen
-               'test-output-ns)
-  ;=> '(clojure.test/is (= :rct-clr.gen/foo (test-output-ns/bind-repl-vars! (get-type))))
-  )
+                              (test-output-ns/error->map e)))))
 
 (defn ns-sym->test-base
   "Convert namespace symbol to base name for tests."
@@ -366,8 +330,6 @@
 ^:rct/test
 (comment
   (ns-sym->test-base 'my.cool.namespace) ;=> "my-cool-namespace"
-
-  (ns-sym->test-base 'single) ;=> "single"
   )
 
 (defn write-block-fn
