@@ -3,6 +3,7 @@
   (:require [clojure.test :refer [deftest testing]]
             [matcho.core]
             [rct-clr.sample]
+            [rct-clr.sample-clj]
             [rct-clr.sample-clr]))
 
 (defn error->map [e]
@@ -148,6 +149,17 @@
     (rct-clr-sample-rct-block-15)
     (rct-clr-sample-rct-block-16)
     (rct-clr-sample-rct-block-17)))
+
+;; rct-clr.sample-clj
+(defn- rct-clr-sample-clj-rct-block-0 []
+  ;; sample_clj.clj:10
+  (testing "sample_clj.clj:10" (eval (quote (clojure.test/is (= 6 (rct-clr.sample-generated-test/bind-repl-vars! (total [1 2 3])))))))
+  ;; sample_clj.clj:13
+  (testing "sample_clj.clj:13" (eval (quote (clojure.test/is (= 0 (rct-clr.sample-generated-test/bind-repl-vars! (total []))))))))
+(deftest rct-clr-sample-clj-rct
+  (binding [*ns* (the-ns 'rct-clr.sample-clj)
+            *1 nil, *2 nil, *3 nil, *e nil]
+    (rct-clr-sample-clj-rct-block-0)))
 
 ;; rct-clr.sample-clr
 (defn- rct-clr-sample-clr-rct-block-0 []
