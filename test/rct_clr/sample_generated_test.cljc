@@ -155,9 +155,7 @@
 ;; rct-clr.sample-clj
 (defn- rct-clr-sample-clj-rct-block-0 []
   ;; sample_clj.clj:10
-  (testing "sample_clj.clj:10" (eval (quote (clojure.test/is (= 6 (rct-clr.sample-generated-test/bind-repl-vars! (total [1 2 3])))))))
-  ;; sample_clj.clj:12
-  (testing "sample_clj.clj:12" (eval (quote (clojure.test/is (= 0 (rct-clr.sample-generated-test/bind-repl-vars! (total []))))))))
+  (testing "sample_clj.clj:10" (eval (quote (clojure.test/is (= 6 (rct-clr.sample-generated-test/bind-repl-vars! (total [1 2 3]))))))))
 (deftest rct-clr-sample-clj-rct
   (binding [*ns* (the-ns 'rct-clr.sample-clj)
             *1 nil, *2 nil, *3 nil, *e nil]
