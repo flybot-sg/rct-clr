@@ -1,49 +1,57 @@
 # Contributing
 
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), with the stylistic rules of [@commitlint/config-conventional](https://github.com/conventional-changelog/commitlint/tree/master/%40commitlint/config-conventional). The changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 ## Filing issues
 
 An issue is a **problem statement**. The title says what is wrong, the body shows it, and an optional suggestion proposes a fix.
 
-Phrase the title as the problem, not the solution:
+### Title
+
+Phrase the title as the problem, not the solution.
 
 - Good: `A => expectation written as a list is called as a function instead of compared as data`
 - Bad: `Quote list expectations in datum->form`
 
-Body:
+### Body
 
     ## Problem
 
-    A minimal reproducing block, the command that surfaces it, and the output.
+    What is wrong. A minimal reproducing code block, the command that surfaces it, the output, and permalinks to the code.
 
     ## Suggestion
 
     Optional. The concrete change as a code block, and why. Drop the section when you have none.
 
-Show, do not describe. A block someone can paste beats a paragraph.
+Show, do not describe. A block someone can paste beats a paragraph. Two sections only.
 
 ## Pull requests
 
-PRs target `main`. Branch from it, named `<issue-number>-<short-description>`, e.g. `13-expectation-called-as-function`.
+Pull requests target `main`. Branch from it, named `<issue-number>-<short-description>`, e.g. `17-clj-files-not-scanned`.
 
-Title: `<prefix>(<scope>): <short description>`, one line.
+### Title
 
-Description:
+Same format as a commit title, one line:
+
+    <prefix>(<scope>): <short description>
+
+### Description
 
     Closes #<issue-number>
     ---
 
-    - First change
-    - Second change
+    - First change description
+    - Second change description
 
-One bullet per change. The issue carries the context.
+Keep bullets short; the issue carries the full context.
 
-## Merging
+### Changelog entry
 
-Rebase when every commit builds and passes on its own. Squash otherwise. No merge commits.
+A pull request with a user-facing change adds an entry under `## [Unreleased]` in [CHANGELOG.md](./CHANGELOG.md), in the same pull request, while the context is fresh. Describe the change as a user experiences it, the old symptom and the new behavior rather than the implementation, and end with the issue link. Internal refactors and test-only changes need no entry.
 
-A branch whose commits are "fix it", "address review", "typo" is one change.
+### Before opening one
 
-## Before opening a PR
+Run the local gate first; CI runs the same checks:
 
 ```bash
 bb fmt-check
@@ -60,16 +68,40 @@ Read the assertion count, not the exit code: a runner that discovers no namespac
 
 Regenerate with `bb gen-clr-rct` and commit the result.
 
-Projects that *use* rct-clr do the opposite and git-ignore theirs.
+## Merging
+
+Rebase when every commit builds and passes on its own. Squash otherwise. No merge commits.
+
+A branch whose commits are "fix it", "address review", "typo" is one change.
 
 ## Commits
 
-[Conventional Commits](https://www.conventionalcommits.org/), one-line title:
-
     <prefix>(<scope>): <description>
 
-Prefixes: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`.
+| Prefix | Use for |
+|--------|---------|
+| `feat` | New features |
+| `fix` | Bug fixes |
+| `refactor` | Code restructuring, no behavior change |
+| `perf` | Performance improvement |
+| `docs` | Documentation only |
+| `test` | Adding or updating tests |
+| `build` | Build system or dependencies |
+| `ci` | CI configuration |
+| `style` | Formatting only |
+| `revert` | Reverts an earlier commit |
+| `chore` | Anything else that touches no source |
 
-The body is a few plain sentences: what changed, and the why a reader cannot get from the diff. Do not list the files touched, narrate the steps taken, or report test results; the diff and CI already show those. LLM-generated messages tend to include all three, so trim them before committing.
+- One line, under 100 characters.
+- Lowercase description, no trailing period.
+- Imperative mood: `add feature`, not `added feature`.
+- The scope is required and names the component: `gen`, `clr`, `deps`, `ci`, `repo`.
+- Details belong in the PR description, not the commit.
 
-Reference the issue with `Closes #42`. Issue numbers belong in commit messages and PR descriptions, never in source files or comments.
+Keep the body to a few plain sentences: the what and the non-obvious why. Do not list the files touched, narrate the steps taken, or report test results; the diff and CI already show those. LLM-generated messages tend to include all three, so trim them before committing.
+
+Reference the issue in the title or body, e.g. `(#42)` or `Closes #42`. Issue references belong in commit messages and PR descriptions only, never in source files or comments: trackers migrate, and in-code numbers go stale.
+
+## LLM context files
+
+LLM context files are not committed. The only exception could be `AGENTS.md`, and we still recommend against it.

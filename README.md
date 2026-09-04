@@ -267,3 +267,8 @@ Example output (abbreviated):
             *1 nil, *2 nil, *3 nil, *e nil]
     (my-project-core-rct-block-0)))
 ```
+
+## Contributing
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) - issues, pull requests, the local gate, commits
+- [CHANGELOG.md](CHANGELOG.md) - what changed, per release
