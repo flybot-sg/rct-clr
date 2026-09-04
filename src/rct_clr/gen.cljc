@@ -41,7 +41,7 @@
         aliases (ns-aliases the-ns)]
     (into {:current ns-sym}
           (map (fn [[alias-sym ns-obj]]
-                 [(keyword alias-sym) (ns-name ns-obj)]))
+                 [alias-sym (ns-name ns-obj)]))
           aliases)))
 
 ^:rct/test
@@ -49,16 +49,16 @@
   (build-resolver 'rct-clr.gen)
   ;=>
   {:current 'rct-clr.gen
-   :cli 'clojure.tools.cli
-   :emit 'com.mjdowney.rich-comment-tests.emit-tests
-   :io 'clojure.java.io
-   :ns-file 'clojure.tools.namespace.file
-   :ns-parse 'clojure.tools.namespace.parse
-   :rct 'com.mjdowney.rich-comment-tests
-   :string 'clojure.string
-   :tr 'clojure.tools.reader
-   :walk 'clojure.walk
-   :z 'rewrite-clj.zip}
+   'cli 'clojure.tools.cli
+   'emit 'com.mjdowney.rich-comment-tests.emit-tests
+   'io 'clojure.java.io
+   'ns-file 'clojure.tools.namespace.file
+   'ns-parse 'clojure.tools.namespace.parse
+   'rct 'com.mjdowney.rich-comment-tests
+   'string 'clojure.string
+   'tr 'clojure.tools.reader
+   'walk 'clojure.walk
+   'z 'rewrite-clj.zip}
 
   ;; namespace with no aliases returns just :current
   (def rct-test-bare-ns (create-ns (gensym "bare-ns-")))

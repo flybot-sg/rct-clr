@@ -139,6 +139,10 @@
   ;=> {::str/join :string-alias
   ;;   ::set/union :set-alias
   ;;   ::walk/walk :walk-alias}
+
+  ;; alias-qualified keyword in the test expression, not the expectation
+  (namespace ::str/join)
+  ;=> "clojure.string"
   )
 
 ;; --- Nested data structures ---
