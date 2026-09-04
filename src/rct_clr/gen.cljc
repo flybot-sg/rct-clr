@@ -12,12 +12,20 @@
             [clojure.walk :as walk]
             [rewrite-clj.zip :as z]))
 
-(defn find-cljc-files
-  "Find all .cljc files in dir. Ignores .clj, since CLR can only run .cljc."
+(defn- cljc?
+  [file]
+  (string/ends-with? (.getName file) ".cljc"))
+
+(defn find-source-files
+  "Find all .clj and .cljc files in dir, keeping the .cljc when a namespace is
+  present as both."
   [dir]
   (->> (io/file dir)
        file-seq
-       (filter #(and (.isFile %) (string/ends-with? (.getName %) ".cljc")))
+       (filter #(and (.isFile %) (re-find #"\.cljc?$" (.getName %))))
+       (group-by #(string/replace (.getPath %) #"\.cljc?$" ""))
+       vals
+       (map #(or (first (filter cljc? %)) (first %)))
        sort))
 
 (defn file->ns-sym
@@ -520,7 +528,7 @@
   Throws ex-info if a namespace fails to load."
   [{:keys [src-dirs output namespace]}]
   (let [output-ns (symbol namespace)
-        files (mapcat find-cljc-files src-dirs)
+        files (mapcat find-source-files src-dirs)
         file-blocks (for [f files
                           :let [ns-sym (file->ns-sym f)]
                           :when (if ns-sym

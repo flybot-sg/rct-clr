@@ -239,30 +239,38 @@
     (is (= expected out))))
 
 ;; ---------------------------------------------------------------------------
-;; find-cljc-files
+;; find-source-files
 ;; ---------------------------------------------------------------------------
 
-(deftest find-cljc-files-test
-  (with-tmp-dir [dir {"foo.cljc" "(ns foo)"
-                      "bar.clj"  "(ns bar)"
-                      "baz.txt"  "hello"}]
-    (testing "finds only .cljc files"
-      (is (= ["foo.cljc"] (mapv #(.getName %) (gen/find-cljc-files (str dir))))))))
+(deftest find-source-files-test
+  (with-tmp-dir [dir {"foo.cljc"  "(ns foo)"
+                      "bar.clj"   "(ns bar)"
+                      "quux.cljs" "(ns quux)"
+                      "baz.txt"   "hello"}]
+    (testing "finds .clj and .cljc files"
+      (is (= ["bar.clj" "foo.cljc"]
+             (mapv #(.getName %) (gen/find-source-files (str dir))))))))
 
-(deftest find-cljc-files-empty-dir-test
+(deftest find-source-files-both-extensions-test
+  (with-tmp-dir [dir {"both.cljc" "(ns both)"
+                      "both.clj"  "(ns both)"}]
+    (testing "keeps the .cljc when a namespace is present as both"
+      (is (= ["both.cljc"]
+             (mapv #(.getName %) (gen/find-source-files (str dir))))))))
+
+(deftest find-source-files-empty-dir-test
   (with-tmp-dir [dir {}]
-    (is (empty? (gen/find-cljc-files (str dir))))))
+    (is (empty? (gen/find-source-files (str dir))))))
 
-(deftest find-cljc-files-nested-test
-  (with-tmp-dir [dir {"top.cljc"        "(ns top)"
-                      "sub/nested.cljc" "(ns sub.nested)"
-                      "sub/ignored.clj" "(ns sub.ignored)"}]
-    (let [names (mapv #(.getName %) (gen/find-cljc-files (str dir)))]
-      (testing "finds .cljc in subdirectories, sorted"
-        (is (= ["nested.cljc" "top.cljc"] names))))))
+(deftest find-source-files-nested-test
+  (with-tmp-dir [dir {"top.cljc"       "(ns top)"
+                      "sub/nested.clj" "(ns sub.nested)"}]
+    (let [names (mapv #(.getName %) (gen/find-source-files (str dir)))]
+      (testing "finds files in subdirectories, sorted"
+        (is (= ["nested.clj" "top.cljc"] names))))))
 
-(deftest find-cljc-files-nonexistent-dir-test
-  (is (empty? (gen/find-cljc-files "/tmp/rct-clr-does-not-exist-999"))))
+(deftest find-source-files-nonexistent-dir-test
+  (is (empty? (gen/find-source-files "/tmp/rct-clr-does-not-exist-999"))))
 
 ;; ---------------------------------------------------------------------------
 ;; Self-referential integration: file->ns-sym, file->rct-blocks

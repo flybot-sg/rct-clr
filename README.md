@@ -79,7 +79,7 @@ See [`examples/`](examples/), [`examples_clr/`](examples_clr/), and [`examples_j
 
 ## How it works
 
-1. **Extract (JVM):** `rct-clr.gen` scans `.cljc` source files, loads each namespace, finds every `^:rct/test` block, and writes the assertions into a plain `.cljc` test file. (`.clj` files are ignored.)
+1. **Extract (JVM):** `rct-clr.gen` scans `.clj` and `.cljc` source files, loads each namespace, finds every `^:rct/test` block, and writes the assertions into a plain `.cljc` test file.
 2. **Test (CLR):** Run that file with `clojure.test` on MAGIC or ClojureCLR. It needs only `clojure.test` and `matcho.core`.
 
 ## Prerequisites
