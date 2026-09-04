@@ -72,62 +72,64 @@
   (testing "sample.cljc:125" (eval (quote (clojure.test/is (= :rct-clr.sample/sample (rct-clr.sample-generated-test/bind-repl-vars! (my-type))))))))
 (defn- rct-clr-sample-rct-block-6 []
   ;; sample.cljc:138
-  (testing "sample.cljc:138" (eval (quote (clojure.test/is (= {:clojure.string/join :string-alias, :clojure.set/union :set-alias, :clojure.walk/walk :walk-alias} (rct-clr.sample-generated-test/bind-repl-vars! (alias-kws))))))))
+  (testing "sample.cljc:138" (eval (quote (clojure.test/is (= {:clojure.string/join :string-alias, :clojure.set/union :set-alias, :clojure.walk/walk :walk-alias} (rct-clr.sample-generated-test/bind-repl-vars! (alias-kws)))))))
+  ;; sample.cljc:144
+  (testing "sample.cljc:144" (eval (quote (clojure.test/is (= "clojure.string" (rct-clr.sample-generated-test/bind-repl-vars! (namespace :clojure.string/join))))))))
 (defn- rct-clr-sample-rct-block-7 []
-  ;; sample.cljc:155
-  (testing "sample.cljc:155" (eval (quote (clojure.test/is (= {:id 1, :name "Alice", :settings {:theme "dark", :lang "en", :notifications true}, :tags #{:active :verified}} (rct-clr.sample-generated-test/bind-repl-vars! (user-profile 1 "Alice")))))))
-  ;; sample.cljc:162
-  (testing "sample.cljc:162" (eval (quote (clojure.test/is (= "dark" (rct-clr.sample-generated-test/bind-repl-vars! (get-in (user-profile 1 "Alice") [:settings :theme]))))))))
+  ;; sample.cljc:159
+  (testing "sample.cljc:159" (eval (quote (clojure.test/is (= {:id 1, :name "Alice", :settings {:theme "dark", :lang "en", :notifications true}, :tags #{:active :verified}} (rct-clr.sample-generated-test/bind-repl-vars! (user-profile 1 "Alice")))))))
+  ;; sample.cljc:166
+  (testing "sample.cljc:166" (eval (quote (clojure.test/is (= "dark" (rct-clr.sample-generated-test/bind-repl-vars! (get-in (user-profile 1 "Alice") [:settings :theme]))))))))
 (defn- rct-clr-sample-rct-block-8 []
-  ;; sample.cljc:178
-  (testing "sample.cljc:178" (eval (quote (matcho.core/assert {:status 200, :body {:users []}} (rct-clr.sample-generated-test/bind-repl-vars! (api-response {:users []}))))))
   ;; sample.cljc:182
-  (testing "sample.cljc:182" (eval (quote (matcho.core/assert {:body {:count 5}, :timing {:start 0}} (rct-clr.sample-generated-test/bind-repl-vars! (api-response {:count 5})))))))
+  (testing "sample.cljc:182" (eval (quote (matcho.core/assert {:status 200, :body {:users []}} (rct-clr.sample-generated-test/bind-repl-vars! (api-response {:users []}))))))
+  ;; sample.cljc:186
+  (testing "sample.cljc:186" (eval (quote (matcho.core/assert {:body {:count 5}, :timing {:start 0}} (rct-clr.sample-generated-test/bind-repl-vars! (api-response {:count 5})))))))
 (defn- rct-clr-sample-rct-block-9 []
-  ;; sample.cljc:197
-  (testing "sample.cljc:197" (eval (quote (matcho.core/assert [{:name "a"}] (rct-clr.sample-generated-test/bind-repl-vars! (scored-items))))))
   ;; sample.cljc:201
-  (testing "sample.cljc:201" (eval (quote (matcho.core/assert ^#:matcho{:strict true} ["a" "b" "c"] (rct-clr.sample-generated-test/bind-repl-vars! (mapv :name (scored-items))))))))
+  (testing "sample.cljc:201" (eval (quote (matcho.core/assert [{:name "a"}] (rct-clr.sample-generated-test/bind-repl-vars! (scored-items))))))
+  ;; sample.cljc:205
+  (testing "sample.cljc:205" (eval (quote (matcho.core/assert ^#:matcho{:strict true} ["a" "b" "c"] (rct-clr.sample-generated-test/bind-repl-vars! (mapv :name (scored-items))))))))
 (defn- rct-clr-sample-rct-block-10 []
-  ;; sample.cljc:212
-  (testing "sample.cljc:212" (eval (quote (matcho.core/assert [0 1 1 2] (rct-clr.sample-generated-test/bind-repl-vars! (fibonacci 7))))))
-  ;; sample.cljc:215
-  (testing "sample.cljc:215" (eval (quote (matcho.core/assert ^#:matcho{:strict true} [0 1 1] (rct-clr.sample-generated-test/bind-repl-vars! (fibonacci 3)))))))
+  ;; sample.cljc:216
+  (testing "sample.cljc:216" (eval (quote (matcho.core/assert [0 1 1 2] (rct-clr.sample-generated-test/bind-repl-vars! (fibonacci 7))))))
+  ;; sample.cljc:219
+  (testing "sample.cljc:219" (eval (quote (matcho.core/assert ^#:matcho{:strict true} [0 1 1] (rct-clr.sample-generated-test/bind-repl-vars! (fibonacci 3)))))))
 (defn- rct-clr-sample-rct-block-11 []
-  ;; sample.cljc:226
-  (testing "sample.cljc:226" (eval (quote (clojure.test/is (= #{:c :b} (rct-clr.sample-generated-test/bind-repl-vars! (common-tags #{:c :b :a} #{:c :b :d})))))))
-  ;; sample.cljc:229
-  (testing "sample.cljc:229" (eval (quote (clojure.test/is (= #{:b :a} (rct-clr.sample-generated-test/bind-repl-vars! (set/union #{:a} #{:b}))))))))
+  ;; sample.cljc:230
+  (testing "sample.cljc:230" (eval (quote (clojure.test/is (= #{:c :b} (rct-clr.sample-generated-test/bind-repl-vars! (common-tags #{:c :b :a} #{:c :b :d})))))))
+  ;; sample.cljc:233
+  (testing "sample.cljc:233" (eval (quote (clojure.test/is (= #{:b :a} (rct-clr.sample-generated-test/bind-repl-vars! (set/union #{:a} #{:b}))))))))
 (defn- rct-clr-sample-rct-block-12 []
-  ;; sample.cljc:244
-  (testing "sample.cljc:244" (eval (quote (clojure.test/is (= "alice bob" (rct-clr.sample-generated-test/bind-repl-vars! (normalize-name "  Alice BOB  ")))))))
-  ;; sample.cljc:247
-  (testing "sample.cljc:247" (eval (quote (clojure.test/is (= {:name "alice bob", :slug "alice-bob"} (rct-clr.sample-generated-test/bind-repl-vars! (make-user "  Alice BOB  "))))))))
+  ;; sample.cljc:248
+  (testing "sample.cljc:248" (eval (quote (clojure.test/is (= "alice bob" (rct-clr.sample-generated-test/bind-repl-vars! (normalize-name "  Alice BOB  ")))))))
+  ;; sample.cljc:251
+  (testing "sample.cljc:251" (eval (quote (clojure.test/is (= {:name "alice bob", :slug "alice-bob"} (rct-clr.sample-generated-test/bind-repl-vars! (make-user "  Alice BOB  "))))))))
 (defn- rct-clr-sample-rct-block-13 []
-  ;; sample.cljc:259
-  (testing "sample.cljc:259" (eval (quote (try (validate-positive! -1) (clojure.test/is false "Expected exception") (catch System.Exception e (set! *e e) (matcho.core/assert #:error{:data {:value -1}} (rct-clr.sample-generated-test/error->map e))))))))
+  ;; sample.cljc:263
+  (testing "sample.cljc:263" (eval (quote (try (validate-positive! -1) (clojure.test/is false "Expected exception") (catch System.Exception e (set! *e e) (matcho.core/assert #:error{:data {:value -1}} (rct-clr.sample-generated-test/error->map e))))))))
 (defn- rct-clr-sample-rct-block-14 []
-  ;; sample.cljc:273
-  (testing "sample.cljc:273" (eval (quote (clojure.test/is (= {:host "localhost"} (rct-clr.sample-generated-test/bind-repl-vars! (parse-config {:host "localhost"})))))))
   ;; sample.cljc:277
-  (testing "sample.cljc:277" (eval (quote (try (parse-config "oops") (clojure.test/is false "Expected exception") (catch System.Exception e (set! *e e) (matcho.core/assert #:error{:data {:got System.String}} (rct-clr.sample-generated-test/error->map e)))))))
+  (testing "sample.cljc:277" (eval (quote (clojure.test/is (= {:host "localhost"} (rct-clr.sample-generated-test/bind-repl-vars! (parse-config {:host "localhost"})))))))
   ;; sample.cljc:281
-  (testing "sample.cljc:281" (eval (quote (try (parse-config {:port 8080}) (clojure.test/is false "Expected exception") (catch System.Exception e (set! *e e) (matcho.core/assert #:error{:data {:missing :host}} (rct-clr.sample-generated-test/error->map e))))))))
+  (testing "sample.cljc:281" (eval (quote (try (parse-config "oops") (clojure.test/is false "Expected exception") (catch System.Exception e (set! *e e) (matcho.core/assert #:error{:data {:got System.String}} (rct-clr.sample-generated-test/error->map e)))))))
+  ;; sample.cljc:285
+  (testing "sample.cljc:285" (eval (quote (try (parse-config {:port 8080}) (clojure.test/is false "Expected exception") (catch System.Exception e (set! *e e) (matcho.core/assert #:error{:data {:missing :host}} (rct-clr.sample-generated-test/error->map e))))))))
 (defn- rct-clr-sample-rct-block-15 []
-  ;; sample.cljc:297
-  (testing "sample.cljc:297" (eval (quote (clojure.test/is (= {"a" 1, "b" {"c" 2}} (rct-clr.sample-generated-test/bind-repl-vars! (stringify-keys {:b {:c 2}, :a 1}))))))))
+  ;; sample.cljc:301
+  (testing "sample.cljc:301" (eval (quote (clojure.test/is (= {"a" 1, "b" {"c" 2}} (rct-clr.sample-generated-test/bind-repl-vars! (stringify-keys {:b {:c 2}, :a 1}))))))))
 (defn- rct-clr-sample-rct-block-16 []
-  ;; sample.cljc:308
-  (testing "sample.cljc:308" (eval (quote (clojure.test/is (= true (rct-clr.sample-generated-test/bind-repl-vars! (truthy? 1)))))))
-  ;; sample.cljc:311
-  (testing "sample.cljc:311" (eval (quote (clojure.test/is (= false (rct-clr.sample-generated-test/bind-repl-vars! (truthy? nil)))))))
-  ;; sample.cljc:314
-  (testing "sample.cljc:314" (eval (quote (clojure.test/is (= false (rct-clr.sample-generated-test/bind-repl-vars! (truthy? false)))))))
-  ;; sample.cljc:317
-  (testing "sample.cljc:317" (eval (quote (clojure.test/is (= true (rct-clr.sample-generated-test/bind-repl-vars! (nil? nil))))))))
+  ;; sample.cljc:312
+  (testing "sample.cljc:312" (eval (quote (clojure.test/is (= true (rct-clr.sample-generated-test/bind-repl-vars! (truthy? 1)))))))
+  ;; sample.cljc:315
+  (testing "sample.cljc:315" (eval (quote (clojure.test/is (= false (rct-clr.sample-generated-test/bind-repl-vars! (truthy? nil)))))))
+  ;; sample.cljc:318
+  (testing "sample.cljc:318" (eval (quote (clojure.test/is (= false (rct-clr.sample-generated-test/bind-repl-vars! (truthy? false)))))))
+  ;; sample.cljc:321
+  (testing "sample.cljc:321" (eval (quote (clojure.test/is (= true (rct-clr.sample-generated-test/bind-repl-vars! (nil? nil))))))))
 (defn- rct-clr-sample-rct-block-17 []
-  ;; sample.cljc:328
-  (testing "sample.cljc:328" (eval (quote (clojure.test/is (= {} (rct-clr.sample-generated-test/bind-repl-vars! (ex-data (make-error "boom")))))))))
+  ;; sample.cljc:332
+  (testing "sample.cljc:332" (eval (quote (clojure.test/is (= {} (rct-clr.sample-generated-test/bind-repl-vars! (ex-data (make-error "boom")))))))))
 (deftest rct-clr-sample-rct
   (binding [*ns* (the-ns 'rct-clr.sample)
             *1 nil, *2 nil, *3 nil, *e nil]
