@@ -107,21 +107,22 @@
          (catch (read-string "#?(:clj Exception :cljr System.Exception)") e
            (read-string "#?(:clj (.getMessage e) :cljr (.Message e))")))
    'rct-clr.gen)
-  ;=> '(try (foo)
-  ;;        (catch System.Exception e
-  ;;          (.Message e)))
+  ;=>
+  '(try (foo)
+        (catch System.Exception e
+          (.Message e)))
 
   ;; resolves reader conditional nested inside a regular expression
   (resolve-reader-conditionals
    '(+ (/ pos-score visits)
        (read-string "#?(:clj (Math/sqrt visits) :cljr (Math/Sqrt visits))"))
    'rct-clr.gen)
-  ;=> '(+ (/ pos-score visits)
-  ;;       (Math/Sqrt visits))
+  ;=>
+  '(+ (/ pos-score visits)
+      (Math/Sqrt visits))
 
   ;; passes through forms without reader conditionals unchanged
-  (resolve-reader-conditionals '(+ 1 2) 'rct-clr.gen)
-  ;=> '(+ 1 2)
+  (resolve-reader-conditionals '(+ 1 2) 'rct-clr.gen) ;=> '(+ 1 2)
 
   ;; resolves #? inside a tagged literal
   (resolve-reader-conditionals
@@ -173,26 +174,20 @@
 
 ^:rct/test
 (comment
-  (self-evaluating? 42)
-  ;=> true
+  (self-evaluating? 42) ;=> true
 
   ;; a seq evaluates as a call
-  (self-evaluating? '(:h :c :s))
-  ;=> false
+  (self-evaluating? '(:h :c :s)) ;=> false
 
   ;; a symbol evaluates as a var reference
-  (self-evaluating? 'foo)
-  ;=> false
+  (self-evaluating? 'foo) ;=> false
 
-  (self-evaluating? [1 2 3])
-  ;=> true
+  (self-evaluating? [1 2 3]) ;=> true
 
   ;; a collection is only as safe as its elements, map entries included
-  (self-evaluating? '{:a (1 2)})
-  ;=> false
+  (self-evaluating? '{:a (1 2)}) ;=> false
 
-  (self-evaluating? [])
-  ;=> true
+  (self-evaluating? []) ;=> true
   )
 
 (defn read-expectation
@@ -370,11 +365,9 @@
 
 ^:rct/test
 (comment
-  (ns-sym->test-base 'my.cool.namespace)
-  ;=> "my-cool-namespace"
+  (ns-sym->test-base 'my.cool.namespace) ;=> "my-cool-namespace"
 
-  (ns-sym->test-base 'single)
-  ;=> "single"
+  (ns-sym->test-base 'single) ;=> "single"
   )
 
 (defn write-block-fn
@@ -515,11 +508,9 @@
   ;=> {:errors ["Must provide --output / -o" "Must provide --namespace / -n"]}
 
   ;; unknown flag produces errors
-  (contains? (validate-opts ["--bogus"]) :errors)
-  ;=> true
+  (contains? (validate-opts ["--bogus"]) :errors) ;=> true
 
-  (contains? (validate-opts ["-h"]) :help)
-  ;=> true
+  (contains? (validate-opts ["-h"]) :help) ;=> true
   )
 
 (defn generate

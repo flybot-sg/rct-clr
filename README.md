@@ -23,8 +23,7 @@ Standard `^:rct/test` blocks work unchanged: the generator handles the platform 
 
 ^:rct/test
 (comment
-  (platform)
-  ;=> #?(:clj :jvm :cljr :clr)
+  (platform) ;=> #?(:clj :jvm :cljr :clr)
   )
 
 ;;;; Exception assertions with throws=>>
@@ -43,8 +42,9 @@ Standard `^:rct/test` blocks work unchanged: the generator handles the platform 
 ^:rct/test
 (comment
   (validate-positive! -1)
-  ;throws=>> {:error/message "must be positive"
-  ;;          :error/data {:value -1}}
+  ;throws=>>
+  {:error/message "must be positive"
+   :error/data {:value -1}}
   )
 
 ;;;; Reader conditionals in test expressions
@@ -59,8 +59,7 @@ Standard `^:rct/test` blocks work unchanged: the generator handles the platform 
 
 ^:rct/test
 (comment
-  (.Message (make-error "boom"))
-  ;=> "boom"
+  (.Message (make-error "boom")) ;=> "boom"
   )
 
 ;; -- examples_jvm/rct_clr/sample_jvm.cljc (RCT runner tests this) --
@@ -70,8 +69,7 @@ Standard `^:rct/test` blocks work unchanged: the generator handles the platform 
 
 ^:rct/test
 (comment
-  (.getMessage (make-error "boom"))
-  ;=> "boom"
+  (.getMessage (make-error "boom")) ;=> "boom"
   )
 ```
 

@@ -14,24 +14,20 @@
 ^:rct/test
 (comment
   ;; => exact match
-  (add 1 2)
-  ;=> 3
+  (add 1 2) ;=> 3
 
-  (add -1 1)
-  ;=> 0
+  (add -1 1) ;=> 0
 
   ;; side-effect (nil expectation type) with literal
   (def base-val 10)
 
   ;; reference a prior def
-  (add base-val 5)
-  ;=> 15
+  (add base-val 5) ;=> 15
 
   ;; side-effect with computed value
   (def doubled (* base-val 2))
 
-  (add doubled 1)
-  ;=> 21
+  (add doubled 1) ;=> 21
   )
 
 ;; --- Seq-valued and symbol expectations ---
@@ -45,20 +41,16 @@
 ^:rct/test
 (comment
   ;; a keyword-headed list cannot be called, so it compares as data
-  (suits)
-  ;=> (:h :c :s :d)
+  (suits) ;=> (:h :c :s :d)
 
   ;; a number in head position
-  (map inc (range 3))
-  ;=> (1 2 3)
+  (map inc (range 3)) ;=> (1 2 3)
 
   ;; a symbol is compared, not resolved
-  (a-symbol)
-  ;=> foo
+  (a-symbol) ;=> foo
 
   ;; an expectation that evaluates keeps its value
-  (count (suits))
-  ;=> (+ 2 2)
+  (count (suits)) ;=> (+ 2 2)
   )
 
 ;; --- Chaining off *1 and *2 ---
@@ -68,16 +60,13 @@
 
 ^:rct/test
 (comment
-  (stack-push [1 2] 3)
-  ;=> [1 2 3]
+  (stack-push [1 2] 3) ;=> [1 2 3]
 
   ;; *1 carries the previous result
-  (count *1)
-  ;=> 3
+  (count *1) ;=> 3
 
   ;; *2 reaches one form further back
-  (peek *2)
-  ;=> 3
+  (peek *2) ;=> 3
   )
 
 ;; --- String operations and alias-qualified calls ---
@@ -87,20 +76,15 @@
 
 ^:rct/test
 (comment
-  (greet "World")
-  ;=> "Hello, World!"
+  (greet "World") ;=> "Hello, World!"
 
-  (str/upper-case (greet "test"))
-  ;=> "HELLO, TEST!"
+  (str/upper-case (greet "test")) ;=> "HELLO, TEST!"
 
-  (str/join ", " ["a" "b" "c"])
-  ;=> "a, b, c"
+  (str/join ", " ["a" "b" "c"]) ;=> "a, b, c"
 
-  (str/blank? "")
-  ;=> true
+  (str/blank? "") ;=> true
 
-  (str/blank? "x")
-  ;=> false
+  (str/blank? "x") ;=> false
   )
 
 ;; --- Platform via reader conditional ---
@@ -111,8 +95,7 @@
 ^:rct/test
 (comment
   ;; reader conditional in expectation
-  (platform)
-  ;=> #?(:clj :jvm :cljr :clr)
+  (platform) ;=> #?(:clj :jvm :cljr :clr)
   )
 
 ;; --- Namespace-qualified keywords ---
@@ -122,8 +105,7 @@
 
 ^:rct/test
 (comment
-  (my-type)
-  ;=> ::sample
+  (my-type) ;=> ::sample
   )
 
 ;; --- Alias-qualified keywords (multiple aliases) ---
@@ -136,13 +118,13 @@
 ^:rct/test
 (comment
   (alias-kws)
-  ;=> {::str/join :string-alias
-  ;;   ::set/union :set-alias
-  ;;   ::walk/walk :walk-alias}
+  ;=>
+  {::str/join :string-alias
+   ::set/union :set-alias
+   ::walk/walk :walk-alias}
 
   ;; alias-qualified keyword in the test expression, not the expectation
-  (namespace ::str/join)
-  ;=> "clojure.string"
+  (namespace ::str/join) ;=> "clojure.string"
   )
 
 ;; --- Nested data structures ---
@@ -157,14 +139,14 @@
 (comment
   ;; exact match on nested structure
   (user-profile 1 "Alice")
-  ;=> {:id 1
-  ;;   :name "Alice"
-  ;;   :settings {:theme "dark" :lang "en" :notifications true}
-  ;;   :tags #{:active :verified}}
+  ;=>
+  {:id 1
+   :name "Alice"
+   :settings {:theme "dark" :lang "en" :notifications true}
+   :tags #{:active :verified}}
 
   ;; nested access
-  (get-in (user-profile 1 "Alice") [:settings :theme])
-  ;=> "dark"
+  (get-in (user-profile 1 "Alice") [:settings :theme]) ;=> "dark"
   )
 
 ;; --- Pattern matching (=>>) with nested maps ---
@@ -179,13 +161,13 @@
 ^:rct/test
 (comment
   ;; =>> ignores extra keys at top level
-  (api-response {:users []})
-  ;=>> {:status 200 :body {:users []}}
+  (api-response {:users []}) ;=>> {:status 200 :body {:users []}}
 
   ;; =>> with nested pattern
   (api-response {:count 5})
-  ;=>> {:body {:count 5}
-  ;;    :timing {:start 0}}
+  ;=>>
+  {:body {:count 5}
+   :timing {:start 0}}
   )
 
 ;; --- =>> with collections ---
@@ -198,12 +180,10 @@
 ^:rct/test
 (comment
   ;; =>> with ellipsis on vector of maps
-  (scored-items)
-  ;=>> [{:name "a"} ...]
+  (scored-items) ;=>> [{:name "a"} ...]
 
   ;; =>> with ^:matcho/strict
-  (mapv :name (scored-items))
-  ;=>> ^:matcho/strict ["a" "b" "c"]
+  (mapv :name (scored-items)) ;=>> ^:matcho/strict ["a" "b" "c"]
   )
 
 ;; --- =>> with ellipsis on simple vectors ---
@@ -213,11 +193,9 @@
 
 ^:rct/test
 (comment
-  (fibonacci 7)
-  ;=>> [0 1 1 2 ...]
+  (fibonacci 7) ;=>> [0 1 1 2 ...]
 
-  (fibonacci 3)
-  ;=>> ^:matcho/strict [0 1 1]
+  (fibonacci 3) ;=>> ^:matcho/strict [0 1 1]
   )
 
 ;; --- Set operations (cross-platform library) ---
@@ -227,11 +205,9 @@
 
 ^:rct/test
 (comment
-  (common-tags #{:a :b :c} #{:b :c :d})
-  ;=> #{:b :c}
+  (common-tags #{:a :b :c} #{:b :c :d}) ;=> #{:b :c}
 
-  (set/union #{:a} #{:b})
-  ;=> #{:a :b}
+  (set/union #{:a} #{:b}) ;=> #{:a :b}
   )
 
 ;; --- Function composition ---
@@ -245,11 +221,9 @@
 
 ^:rct/test
 (comment
-  (normalize-name "  Alice BOB  ")
-  ;=> "alice bob"
+  (normalize-name "  Alice BOB  ") ;=> "alice bob"
 
-  (make-user "  Alice BOB  ")
-  ;=> {:name "alice bob" :slug "alice-bob"}
+  (make-user "  Alice BOB  ") ;=> {:name "alice bob" :slug "alice-bob"}
   )
 
 ;; --- Exception handling (throws=>>) ---
@@ -260,8 +234,7 @@
 
 ^:rct/test
 (comment
-  (validate-positive! -1)
-  ;throws=>> {:error/data {:value -1}}
+  (validate-positive! -1) ;throws=>> {:error/data {:value -1}}
   )
 
 (defn parse-config [m]
@@ -274,16 +247,14 @@
 ^:rct/test
 (comment
   ;; valid input passes through
-  (parse-config {:host "localhost"})
-  ;=> {:host "localhost"}
+  (parse-config {:host "localhost"}) ;=> {:host "localhost"}
 
   ;; not a map
   (parse-config "oops")
   ;throws=>> {:error/data {:got #?(:clj java.lang.String :cljr System.String)}}
 
   ;; missing key
-  (parse-config {:port 8080})
-  ;throws=>> {:error/data {:missing :host}}
+  (parse-config {:port 8080}) ;throws=>> {:error/data {:missing :host}}
   )
 
 ;; --- walk (cross-platform library, complex transformation) ---
@@ -298,8 +269,7 @@
 
 ^:rct/test
 (comment
-  (stringify-keys {:a 1 :b {:c 2}})
-  ;=> {"a" 1 "b" {"c" 2}}
+  (stringify-keys {:a 1 :b {:c 2}}) ;=> {"a" 1 "b" {"c" 2}}
   )
 
 ;; --- Boolean and nil edge cases ---
@@ -309,17 +279,13 @@
 
 ^:rct/test
 (comment
-  (truthy? 1)
-  ;=> true
+  (truthy? 1) ;=> true
 
-  (truthy? nil)
-  ;=> false
+  (truthy? nil) ;=> false
 
-  (truthy? false)
-  ;=> false
+  (truthy? false) ;=> false
 
-  (nil? nil)
-  ;=> true
+  (nil? nil) ;=> true
   )
 
 ;; --- Reader conditional in test expression ---
@@ -329,6 +295,5 @@
 
 ^:rct/test
 (comment
-  (ex-data (make-error "boom"))
-  ;=> {}
+  (ex-data (make-error "boom")) ;=> {}
   )

@@ -10,16 +10,13 @@
 ^:rct/test
 (comment
   ;; CLR interop works without reader conditional in a CLR-only file
-  (.Message (make-error "boom"))
-  ;=> "boom"
+  (.Message (make-error "boom")) ;=> "boom"
 
   ;; reader conditional in test expression, interop method dispatch
-  #?(:cljr (.Message (make-error "boom")))
-  ;=> "boom"
+  #?(:cljr (.Message (make-error "boom"))) ;=> "boom"
 
   ;; simple reader conditional in test expression
-  #?(:clj :jvm :cljr :clr)
-  ;=> #?(:clj :jvm :cljr :clr)
+  #?(:clj :jvm :cljr :clr) ;=> #?(:clj :jvm :cljr :clr)
 
   ;; reader conditional nested inside a larger expression
   (str "error: " #?(:clj (.getMessage (make-error "boom")) :cljr (.Message (make-error "boom"))))
