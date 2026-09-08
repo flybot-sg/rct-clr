@@ -47,6 +47,20 @@ Standard `^:rct/test` blocks work unchanged: the generator handles the platform 
    :error/data {:value -1}}
   )
 
+;;;; Seq-valued => expectations
+;;
+;; A => expectation is code only when a symbol sits in head position.
+;; Any other seq compares as data, so a list of maps needs no quote.
+;; rich-comment-tests evaluates it instead, so this block can fail on the JVM.
+
+(defn card-pair []
+  (list {:suit :h} {:suit :c}))
+
+^:rct/test
+(comment
+  (card-pair) ;=> ({:suit :h} {:suit :c})
+  )
+
 ;;;; Reader conditionals in test expressions
 ;;
 ;; Reader conditionals cannot be used in test expressions, use separate
@@ -223,7 +237,7 @@ Add the generated file to your `.gitignore`.
 The generated file contains:
 
 - A namespace with `^:clr-only` metadata, which JVM test runners filtering on it skip
-- Three helpers, since the generated file requires only `clojure.test` and `matcho.core` and so cannot call RCT's own: `error->map` builds the map a `throws=>>` pattern matches against, `eval-expectation` evaluates a `=>` expectation and falls back to the form when that throws, and `bind-repl-vars!` carries each result into `*1`
+- Three helpers, since the generated file requires only `clojure.test` and `matcho.core` and so cannot call RCT's own: `error->map` builds the map a `throws=>>` pattern matches against, `eval-expectation` runs a `=>` expectation that is still code, a call or a symbol, and falls back to the form when that throws, and `bind-repl-vars!` carries each result into `*1`
 - One `deftest` per source namespace, binding `*ns*` and the REPL vars, with `clojure.test/is` for `=>`, `matcho.core/assert` for `=>>`, and `try`/`catch` plus matcho for `throws=>>`
 - A form with no assertion (`def`, `require`) is emitted for its side effect
 
