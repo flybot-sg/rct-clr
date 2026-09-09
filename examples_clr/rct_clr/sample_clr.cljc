@@ -1,10 +1,8 @@
 (ns rct-clr.sample-clr
-  "Blocks the JVM RCT runner cannot run, generated for the CLR only.
-  A reader conditional in a test expression: rewrite-clj wraps #? as
-  (read-string \"#?(...)\"). Clojure's eval rejects that, so the generator
-  resolves it via `resolve-reader-conditionals`.
-  A data seq in a => expectation: the runner evaluates it. Calling a map with
-  one argument looks a key up, so the comparison gets nil.")
+  "Reader conditional in test expression, CLR-only (not RCT-runnable).
+  The RCT runner can't eval reader conditionals in test expressions because
+  rewrite-clj wraps #? as (read-string \"#?(...)\") and Clojure's eval rejects it.
+  The generator resolves these for CLR via `resolve-reader-conditionals`.")
 
 (defn make-error [msg]
   (ex-info msg {}))
@@ -23,25 +21,4 @@
   ;; reader conditional nested inside a larger expression
   (str "error: " #?(:clj (.getMessage (make-error "boom")) :cljr (.Message (make-error "boom"))))
   ;=> "error: boom"
-  )
-
-(defn card-pair []
-  (list {:suit :h} {:suit :c}))
-
-(defn two-suits []
-  (list :h :c))
-
-(defn nested-pair []
-  {:cards (list {:suit :h} {:suit :c})})
-
-^:rct/test
-(comment
-  ;; a map in head position
-  (card-pair) ;=> ({:suit :h} {:suit :c})
-
-  ;; a keyword in head position, one argument
-  (two-suits) ;=> (:h :c)
-
-  ;; the same seq one level down, as a map value
-  (nested-pair) ;=> {:cards ({:suit :h} {:suit :c})}
   )

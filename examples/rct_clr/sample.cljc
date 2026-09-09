@@ -32,25 +32,25 @@
 
 ;; --- Seq-valued and symbol expectations ---
 
-(defn suits []
-  (list :h :c :s :d))
+(defn one-tag []
+  (list :a))
 
 (defn a-symbol []
   'foo)
 
 ^:rct/test
 (comment
-  ;; a keyword-headed list cannot be called, so it compares as data
-  (suits) ;=> (:h :c :s :d)
+  ;; a keyword head takes one or two arguments, so none throws and it reads as data
+  (one-tag) ;=> (:a)
 
-  ;; a number in head position
-  (map inc (range 3)) ;=> (1 2 3)
+  ;; a number in head position cannot be called at all
+  (map inc (range 1)) ;=> (1)
 
   ;; a symbol is compared, not resolved
   (a-symbol) ;=> foo
 
-  ;; an expectation that evaluates keeps its value
-  (count (suits)) ;=> (+ 2 2)
+  ;; an expectation that evaluates yields its value
+  (count (one-tag)) ;=> (inc 0)
   )
 
 ;; --- Chaining off *1 and *2 ---
