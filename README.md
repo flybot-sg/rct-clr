@@ -49,16 +49,13 @@ Standard `^:rct/test` blocks work unchanged: the generator handles the platform 
 
 ;;;; Seq-valued => expectations
 ;;
-;; A => expectation is code only when a symbol sits in head position.
-;; Any other seq compares as data, so a list of maps needs no quote.
-;; rich-comment-tests evaluates it instead, so this block can fail on the JVM.
-
-(defn card-pair []
-  (list {:suit :h} {:suit :c}))
+;; A => expectation runs as code, so a seq whose head invokes is a call.
+;; (:k m) is a map lookup. Write data as a vector, or quote it.
 
 ^:rct/test
 (comment
-  (card-pair) ;=> ({:suit :h} {:suit :c})
+  (map inc (range 3)) ;=> [1 2 3]
+  (map inc (range 3)) ;=> '(1 2 3)
   )
 
 ;;;; Reader conditionals in test expressions

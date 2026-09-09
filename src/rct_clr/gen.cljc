@@ -169,10 +169,10 @@
   (self-evaluating? 42) ;=> true
 
   ;; a seq evaluates as a call
-  (self-evaluating? '(:h :c :s)) ;=> false
+  (self-evaluating? '(:a)) ;=> false
 
   ;; a quoted form yields its datum
-  (self-evaluating? '(quote (:h :c :s))) ;=> true
+  (self-evaluating? '(quote (:a))) ;=> true
 
   ;; a symbol evaluates as a var reference
   (self-evaluating? 'foo) ;=> false
@@ -183,14 +183,26 @@
   (self-evaluating? '{:a (1 2)}) ;=> false
   )
 
+(defn callable-head?
+  "True when x invokes rather than throwing, in head position of a seq.
+  A seq is a nested call, so its value invokes rather than the seq itself."
+  [x]
+  (or (ifn? x) (seq? x)))
+
+^:rct/test
+(comment
+  (callable-head? :a)              ;=> true
+  (callable-head? '(constantly 1)) ;=> true
+  (callable-head? 1)               ;=> false
+  )
+
 (defn quote-data-seqs
-  "Quote every seq in x that cannot be a call, so it compares as data. A symbol
-  in head position makes a seq a call, anything else makes it data. Recursion
-  stops at a call, whose arguments evaluate. It stops at a record too, which is
-  already a value."
+  "Quote every seq in x that cannot be a call, so it compares as data.
+  Recursion stops at a call, whose arguments evaluate. It stops at a record
+  too, which is already a value."
   [x]
   (cond
-    (seq? x) (if (symbol? (first x)) x (list 'quote x))
+    (seq? x) (if (callable-head? (first x)) x (list 'quote x))
     (record? x) x
     (map? x) (into {}
                    (map (fn [[k v]] [(quote-data-seqs k) (quote-data-seqs v)]))
@@ -201,20 +213,13 @@
 
 ^:rct/test
 (comment
-  ;; a map in head position: calling it looks a key up instead of throwing
-  (quote-data-seqs '({:suit :h} {:suit :c})) ;=> '(quote ({:suit :h} {:suit :c}))
-
-  ;; a symbol in head position, so a call, left for eval-expectation
-  (quote-data-seqs '(+ 1 2)) ;=> '(+ 1 2)
-
-  ;; a bare symbol resolves at test time
-  (quote-data-seqs 'foo) ;=> 'foo
-
-  ;; a collection is decided one element at a time
-  (quote-data-seqs '{:a (1 2) :b (+ 1 2)}) ;=> '{:a (quote (1 2)) :b (+ 1 2)}
-
-  ;; every collection kind is walked
-  (quote-data-seqs '[#{(1 2)}]) ;=> '[#{(quote (1 2))}]
+  (quote-data-seqs '(f))              ;=> '(f)
+  (quote-data-seqs '(:a m))           ;=> '(:a m)
+  (quote-data-seqs '(1))              ;=> '(quote (1))
+  (quote-data-seqs 'foo)              ;=> 'foo
+  (quote-data-seqs '{:a (1) :b (f)})  ;=> '{:a (quote (1)) :b (f)}
+  (quote-data-seqs '[(1)])            ;=> '[(quote (1))]
+  (quote-data-seqs '#{(1)})           ;=> '#{(quote (1))}
   )
 
 (defn read-expectation
@@ -332,12 +337,12 @@
   ;=> '(clojure.test/is (= 3 (test-output-ns/bind-repl-vars! (+ 1 2))))
 
   ;; => a data seq is quoted, so it compares as data instead of being invoked
-  (datum->form {:test-sexpr '(order)
-                :expectation-string "(:h :c :s :d nil)"
+  (datum->form {:test-sexpr '(sizes)
+                :expectation-string "(1 2 3)"
                 :expectation-type '=>}
                'rct-clr.gen
                'test-output-ns)
-  ;=> '(clojure.test/is (= (quote (:h :c :s :d nil)) (test-output-ns/bind-repl-vars! (order))))
+  ;=> '(clojure.test/is (= (quote (1 2 3)) (test-output-ns/bind-repl-vars! (sizes))))
 
   ;; => a call is handed to eval-expectation, which runs it at test time
   (datum->form {:test-sexpr '(size)
