@@ -223,7 +223,7 @@ Add the generated file to your `.gitignore`.
 The generated file contains:
 
 - A namespace with `^:clr-only` metadata, which JVM test runners filtering on it skip
-- Two helpers, since the generated file requires only `clojure.test` and `matcho.core` and so cannot call RCT's own: `error->map` builds the map a `throws=>>` pattern matches against, and `bind-repl-vars!` carries each result into `*1`
+- Three helpers, since the generated file requires only `clojure.test` and `matcho.core` and so cannot call RCT's own: `error->map` builds the map a `throws=>>` pattern matches against, `run-form!` evaluates one form and reports a throw against its own line, and `bind-repl-vars!` carries each result into `*1`
 - One `deftest` per source namespace, binding `*ns*` and the REPL vars, with `clojure.test/is` for `=>`, `matcho.core/assert` for `=>>`, and `try`/`catch` plus matcho for `throws=>>`
 - A form with no assertion (`def`, `require`) is emitted for its side effect
 
@@ -241,6 +241,16 @@ Example output (abbreviated):
    :error/message #?(:clj (.getMessage e) :cljr (.Message e))
    :error/data (ex-data e)})
 
+(defn run-form! [loc form]
+  (try
+    (eval form)
+    (catch #?(:clj Exception :cljr System.Exception) e
+      (clojure.test/do-report
+       {:type :error
+        :message (str "Got " (type e) " evaluating " loc)
+        :expected nil
+        :actual e}))))
+
 (defn bind-repl-vars! [result]
   (set! *3 *2)
   (set! *2 *1)
@@ -251,10 +261,10 @@ Example output (abbreviated):
 (defn- my-project-core-rct-block-0 []
   ;; core.cljc:42
   (testing "core.cljc:42"
-    (eval (quote (clojure.test/is (= 4 (my-project.rct-generated-test/bind-repl-vars! (+ 2 2)))))))
+    (my-project.rct-generated-test/run-form! "core.cljc:42" (quote (clojure.test/is (= 4 (my-project.rct-generated-test/bind-repl-vars! (+ 2 2)))))))
   ;; core.cljc:45
   (testing "core.cljc:45"
-    (eval (quote (matcho.core/assert {:status 200} (my-project.rct-generated-test/bind-repl-vars! (fetch)))))))
+    (my-project.rct-generated-test/run-form! "core.cljc:45" (quote (matcho.core/assert {:status 200} (my-project.rct-generated-test/bind-repl-vars! (fetch)))))))
 
 (deftest my-project-core-rct
   (binding [*ns* (the-ns 'my-project.core)

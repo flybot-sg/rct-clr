@@ -306,11 +306,12 @@
   )
 
 (defn write-block-fn
-  "Write a defn- for a single ^:rct/test block, one eval form per line.
-  Each form is wrapped in (eval (quote ...)) so it resolves in the source
+  "Write a defn- for a single ^:rct/test block, one run-form! call per line.
+  Each form is quoted and eval'd by run-form!, so it resolves in the source
   namespace at test time, not the generated test namespace."
   [w fn-sym block-data ns-sym file output-ns]
   (let [file-name (.getName file)
+        run-sym (symbol (str output-ns) "run-form!")
         body (java.io.StringWriter.)]
     ;; prn, not pprint: pprint drops metadata (e.g. ^:matcho/strict)
     (binding [*out* body
@@ -321,7 +322,8 @@
           (when loc
             (.write body (str "  ;; " loc "\n")))
           (.write body "  ")
-          (let [eval-form (list 'eval (list 'quote (datum->form datum ns-sym output-ns)))]
+          (let [eval-form (list run-sym loc
+                                (list 'quote (datum->form datum ns-sym output-ns)))]
             (if (and (:expectation-type datum) loc)
               (prn (list 'testing loc eval-form))
               (prn eval-form))))))
@@ -360,6 +362,19 @@
    :error/message #?(:clj (.getMessage e) :cljr (.Message e))
    :error/data (ex-data e)})")
 
+(def ^:private run-form-str
+  "Reports a throw against the form's own location, then runs the next form.
+  RCT does the same, so one broken assertion does not end the block."
+  "(defn run-form! [loc form]
+  (try
+    (eval form)
+    (catch #?(:clj Exception :cljr System.Exception) e
+      (clojure.test/do-report
+       {:type :error
+        :message (str \"Got \" (type e) \" evaluating \" loc)
+        :expected nil
+        :actual e}))))")
+
 (def ^:private bind-repl-vars-str
   "Carries a form's value into *1 so a later form in the same block can chain
   off it, as RCT does."
@@ -383,6 +398,7 @@
                    (string/join "\n" req-lines) "))\n"
                    "\n"
                    error->map-str "\n\n"
+                   run-form-str "\n\n"
                    bind-repl-vars-str "\n\n"))))
 
 (def cli-options

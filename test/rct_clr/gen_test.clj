@@ -185,15 +185,17 @@
       (is (= 1 (count forms)))
       (is (= 'defn- (first defn-form)))
       (is (= 4 (count body))))
-    (testing "side-effect with location is bare eval, not testing"
-      (is (= 'eval (first (nth body 0)))))
-    (testing "side-effect without location is bare eval"
-      (is (= 'eval (first (nth body 1)))))
+    (testing "side-effect with location is a bare run-form!, not testing"
+      (is (= 'test.output/run-form! (first (nth body 0))))
+      (is (= "example.cljc:5" (second (nth body 0)))))
+    (testing "side-effect without location is a bare run-form! with nil loc"
+      (is (= 'test.output/run-form! (first (nth body 1))))
+      (is (nil? (second (nth body 1)))))
     (testing "=> with location wrapped in testing"
       (is (= 'testing (first (nth body 2))))
       (is (= "example.cljc:9" (second (nth body 2)))))
-    (testing "assertion without location is bare eval"
-      (is (= 'eval (first (nth body 3)))))
+    (testing "assertion without location is a bare run-form!"
+      (is (= 'test.output/run-form! (first (nth body 3)))))
     (testing "location comments for datums with locations"
       (is (string/includes? out ";; example.cljc:5"))
       (is (string/includes? out ";; example.cljc:9")))
@@ -214,7 +216,7 @@
         out (write-block-output block-data "meta.cljc")
         expected (str "(defn- meta-block-0 []\n"
                       "  ;; meta.cljc:5\n"
-                      "  (testing \"meta.cljc:5\" (eval (quote (matcho.core/assert ^#:matcho{:strict true} [1 2 3] (test.output/bind-repl-vars! (get-items)))))))\n")]
+                      "  (testing \"meta.cljc:5\" (test.output/run-form! \"meta.cljc:5\" (quote (matcho.core/assert ^#:matcho{:strict true} [1 2 3] (test.output/bind-repl-vars! (get-items)))))))\n")]
     (is (= expected out))))
 
 ;; ---------------------------------------------------------------------------
