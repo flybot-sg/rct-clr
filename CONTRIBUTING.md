@@ -74,6 +74,18 @@ Rebase when every commit builds and passes on its own. Squash otherwise. No merg
 
 A branch whose commits are "fix it", "address review", "typo" is one change.
 
+## Releasing
+
+A `v*` tag push deploys `sg.flybot/rct-clr` to Clojars.
+
+1. Move the `## [Unreleased]` entries in [CHANGELOG.md](./CHANGELOG.md) under a new `## [x.y.z] - YYYY-MM-DD` heading.
+2. Set the version in [resources/version.edn](./resources/version.edn).
+3. Commit both as `chore(repo): release x.y.z`.
+4. Run `bb tag`. It reads the version file, then pushes `vx.y.z`.
+5. The tag push runs [clojars-deploy.yml](./.github/workflows/clojars-deploy.yml), which runs `bb deploy`.
+
+Run `bb jar` first to read the pom under `target/classes/META-INF/maven/`. `clojure -T:build install` puts the jar in `~/.m2` for a local consumer to try.
+
 ## Commits
 
     <prefix>(<scope>): <description>

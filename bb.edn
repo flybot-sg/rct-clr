@@ -1,4 +1,5 @@
-{:tasks {dev
+{:tasks {:requires [[clojure.edn :as edn]]
+         dev
          {:doc "Enter development mode"
           :task (clojure (apply str "-M:dev -m nrepl.cmdline --middleware \"[cider.nrepl/cider-middleware]\" " (interpose " " *command-line-args*)))}
          dev-dbg
@@ -31,4 +32,16 @@
          cljr-test
          {:doc  "Regenerate golden files and run the CLR tests on ClojureCLR"
           :task (do (run 'gen-clr-rct)
-                    (shell "cljr" "-X:test"))}}}
+                    (shell "cljr" "-X:test"))}
+         jar
+         {:doc  "Build the jar and its pom under target/"
+          :task (clojure "-T:build" "jar")}
+         deploy
+         {:doc  "Deploy the jar to Clojars"
+          :task (clojure "-T:build" "deploy")}
+         tag
+         {:doc  "Tag the version in resources/version.edn and push the tag"
+          :task (let [version (-> (slurp "resources/version.edn") edn/read-string :version)
+                      tag     (str "v" version)]
+                  (shell "git" "tag" "-a" tag "-m" (str "Release " version))
+                  (shell "git" "push" "origin" tag))}}}
