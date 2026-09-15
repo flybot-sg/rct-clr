@@ -11,12 +11,6 @@
    :error/message #?(:clj (.getMessage e) :cljr (.Message e))
    :error/data (ex-data e)})
 
-(defn eval-expectation [form]
-  (try
-    (eval form)
-    (catch #?(:clj Exception :cljr System.Exception) _
-      form)))
-
 (defn bind-repl-vars! [result]
   (set! *3 *2)
   (set! *2 *1)
@@ -39,13 +33,13 @@
   (testing "sample.cljc:30" (eval (quote (clojure.test/is (= 21 (rct-clr.sample-generated-test/bind-repl-vars! (add doubled 1))))))))
 (defn- rct-clr-sample-rct-block-1 []
   ;; sample.cljc:44
-  (testing "sample.cljc:44" (eval (quote (clojure.test/is (= (rct-clr.sample-generated-test/eval-expectation (quote (:a))) (rct-clr.sample-generated-test/bind-repl-vars! (one-tag)))))))
+  (testing "sample.cljc:44" (eval (quote (clojure.test/is (= (quote (:a)) (rct-clr.sample-generated-test/bind-repl-vars! (one-tag)))))))
   ;; sample.cljc:47
-  (testing "sample.cljc:47" (eval (quote (clojure.test/is (= (quote (1)) (rct-clr.sample-generated-test/bind-repl-vars! (map inc (range 1))))))))
+  (testing "sample.cljc:47" (eval (quote (clojure.test/is (= [1] (rct-clr.sample-generated-test/bind-repl-vars! (map inc (range 1))))))))
   ;; sample.cljc:50
-  (testing "sample.cljc:50" (eval (quote (clojure.test/is (= (rct-clr.sample-generated-test/eval-expectation (quote foo)) (rct-clr.sample-generated-test/bind-repl-vars! (a-symbol)))))))
+  (testing "sample.cljc:50" (eval (quote (clojure.test/is (= (quote foo) (rct-clr.sample-generated-test/bind-repl-vars! (a-symbol)))))))
   ;; sample.cljc:53
-  (testing "sample.cljc:53" (eval (quote (clojure.test/is (= (rct-clr.sample-generated-test/eval-expectation (quote (inc 0))) (rct-clr.sample-generated-test/bind-repl-vars! (count (one-tag)))))))))
+  (testing "sample.cljc:53" (eval (quote (clojure.test/is (= (inc 0) (rct-clr.sample-generated-test/bind-repl-vars! (count (one-tag)))))))))
 (defn- rct-clr-sample-rct-block-2 []
   ;; sample.cljc:63
   (testing "sample.cljc:63" (eval (quote (clojure.test/is (= [1 2 3] (rct-clr.sample-generated-test/bind-repl-vars! (stack-push [1 2] 3)))))))

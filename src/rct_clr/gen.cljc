@@ -153,80 +153,8 @@
                      block)))
          (filter seq))))
 
-(defn self-evaluating?
-  "True when x can be emitted into code position as-is. A quoted form yields its
-  datum. A bare seq evaluates as a call, a symbol as a var reference. A
-  collection qualifies only when every element does."
-  [x]
-  (cond
-    (and (seq? x) (= 'quote (first x))) true
-    (or (seq? x) (symbol? x)) false
-    (coll? x) (every? self-evaluating? x)
-    :else true))
-
-^:rct/test
-(comment
-  (self-evaluating? 42) ;=> true
-
-  ;; a seq evaluates as a call
-  (self-evaluating? '(:a)) ;=> false
-
-  ;; a quoted form yields its datum
-  (self-evaluating? '(quote (:a))) ;=> true
-
-  ;; a symbol evaluates as a var reference
-  (self-evaluating? 'foo) ;=> false
-
-  (self-evaluating? [1 2 3]) ;=> true
-
-  ;; a collection is only as safe as its elements, map entries included
-  (self-evaluating? '{:a (1 2)}) ;=> false
-  )
-
-(defn callable-head?
-  "True when x invokes rather than throwing, in head position of a seq.
-  A seq is a nested call, so its value invokes rather than the seq itself."
-  [x]
-  (or (ifn? x) (seq? x)))
-
-^:rct/test
-(comment
-  (callable-head? :a)              ;=> true
-  (callable-head? '(constantly 1)) ;=> true
-  (callable-head? 1)               ;=> false
-  )
-
-(defn quote-data-seqs
-  "Quote every seq in x that cannot be a call, so it compares as data.
-  Recursion stops at a call, whose arguments evaluate. It stops at a record
-  too, which is already a value."
-  [x]
-  (cond
-    (seq? x) (if (callable-head? (first x)) x (list 'quote x))
-    (record? x) x
-    (map? x) (into {}
-                   (map (fn [[k v]] [(quote-data-seqs k) (quote-data-seqs v)]))
-                   x)
-    (vector? x) (mapv quote-data-seqs x)
-    (set? x) (into #{} (map quote-data-seqs) x)
-    :else x))
-
-^:rct/test
-(comment
-  (quote-data-seqs '(f))              ;=> '(f)
-  (quote-data-seqs '(:a m))           ;=> '(:a m)
-  (quote-data-seqs '(1))              ;=> '(quote (1))
-  (quote-data-seqs 'foo)              ;=> 'foo
-  (quote-data-seqs '{:a (1) :b (f)})  ;=> '{:a (quote (1)) :b (f)}
-  (quote-data-seqs '[(1)])            ;=> '[(quote (1))]
-  (quote-data-seqs '#{(1)})           ;=> '#{(quote (1))}
-  )
-
 (defn read-expectation
-  "Read expectation string into a form, handling ellipses for =>>.
-  Returns the datum unevaluated: RCT evaluates an expectation at test time, and
-  datum->form emits that evaluation into the generated file rather than running
-  it here, so generation stays a pure function of the source."
+  "Read expectation string into a form, handling ellipses for =>>."
   [{:keys [expectation-string expectation-type]} ns-sym]
   (when expectation-string
     (let [s (if (= '=>> expectation-type)
@@ -294,22 +222,15 @@
 
 (defn datum->form
   "Convert an RCT datum to a Clojure form for the generated test.
-  Quote the data seqs in a => expectation. A call or a symbol reaches
-  eval-expectation at test time, once the earlier forms have run."
+  A => expectation lands in code position, as RCT emits it."
   [{:keys [test-sexpr expectation-type] :as datum} ns-sym output-ns]
   (let [error->map-sym (symbol (str output-ns) "error->map")
-        eval-sym (symbol (str output-ns) "eval-expectation")
         expectation (read-expectation datum ns-sym)
         bound-sexpr (list (symbol (str output-ns) "bind-repl-vars!") test-sexpr)]
     (case expectation-type
       ;; nil = side-effect form (def, require)
       nil bound-sexpr
-      => (let [expected (quote-data-seqs expectation)]
-           (list 'clojure.test/is
-                 (list '= (if (self-evaluating? expected)
-                            expected
-                            (list eval-sym (list 'quote expected)))
-                       bound-sexpr)))
+      => (list 'clojure.test/is (list '= expectation bound-sexpr))
       =>> (list 'matcho.core/assert expectation bound-sexpr)
       throws=>> (list 'try test-sexpr
                       (list 'clojure.test/is false "Expected exception")
@@ -336,21 +257,21 @@
                'test-output-ns)
   ;=> '(clojure.test/is (= 3 (test-output-ns/bind-repl-vars! (+ 1 2))))
 
-  ;; => a data seq is quoted, so it compares as data instead of being invoked
+  ;; => a quoted seq compares as data
   (datum->form {:test-sexpr '(sizes)
-                :expectation-string "(1 2 3)"
+                :expectation-string "'(1 2 3)"
                 :expectation-type '=>}
                'rct-clr.gen
                'test-output-ns)
   ;=> '(clojure.test/is (= (quote (1 2 3)) (test-output-ns/bind-repl-vars! (sizes))))
 
-  ;; => a call is handed to eval-expectation, which runs it at test time
+  ;; => a call runs at test time
   (datum->form {:test-sexpr '(size)
                 :expectation-string "(+ 2 2)"
                 :expectation-type '=>}
                'rct-clr.gen
                'test-output-ns)
-  ;=> '(clojure.test/is (= (test-output-ns/eval-expectation (quote (+ 2 2))) (test-output-ns/bind-repl-vars! (size))))
+  ;=> '(clojure.test/is (= (+ 2 2) (test-output-ns/bind-repl-vars! (size))))
 
   ;; =>> expectation: matcho pattern, kept as code
   (datum->form {:test-sexpr '(get-status)
@@ -439,15 +360,6 @@
    :error/message #?(:clj (.getMessage e) :cljr (.Message e))
    :error/data (ex-data e)})")
 
-(def ^:private eval-expectation-str
-  "Runs the part of a => expectation that is still code, a call or a symbol.
-  Falls back to the form when that throws, as RCT does."
-  "(defn eval-expectation [form]
-  (try
-    (eval form)
-    (catch #?(:clj Exception :cljr System.Exception) _
-      form)))")
-
 (def ^:private bind-repl-vars-str
   "Carries a form's value into *1 so a later form in the same block can chain
   off it, as RCT does."
@@ -471,7 +383,6 @@
                    (string/join "\n" req-lines) "))\n"
                    "\n"
                    error->map-str "\n\n"
-                   eval-expectation-str "\n\n"
                    bind-repl-vars-str "\n\n"))))
 
 (def cli-options

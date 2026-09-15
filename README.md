@@ -47,17 +47,6 @@ Standard `^:rct/test` blocks work unchanged: the generator handles the platform 
    :error/data {:value -1}}
   )
 
-;;;; Seq-valued => expectations
-;;
-;; A => expectation runs as code, so a seq whose head invokes is a call.
-;; (:k m) is a map lookup. Write data as a vector, or quote it.
-
-^:rct/test
-(comment
-  (map inc (range 3)) ;=> [1 2 3]
-  (map inc (range 3)) ;=> '(1 2 3)
-  )
-
 ;;;; Reader conditionals in test expressions
 ;;
 ;; Reader conditionals cannot be used in test expressions, use separate
@@ -234,7 +223,7 @@ Add the generated file to your `.gitignore`.
 The generated file contains:
 
 - A namespace with `^:clr-only` metadata, which JVM test runners filtering on it skip
-- Three helpers, since the generated file requires only `clojure.test` and `matcho.core` and so cannot call RCT's own: `error->map` builds the map a `throws=>>` pattern matches against, `eval-expectation` runs a `=>` expectation that is still code, a call or a symbol, and falls back to the form when that throws, and `bind-repl-vars!` carries each result into `*1`
+- Two helpers, since the generated file requires only `clojure.test` and `matcho.core` and so cannot call RCT's own: `error->map` builds the map a `throws=>>` pattern matches against, and `bind-repl-vars!` carries each result into `*1`
 - One `deftest` per source namespace, binding `*ns*` and the REPL vars, with `clojure.test/is` for `=>`, `matcho.core/assert` for `=>>`, and `try`/`catch` plus matcho for `throws=>>`
 - A form with no assertion (`def`, `require`) is emitted for its side effect
 
@@ -251,12 +240,6 @@ Example output (abbreviated):
   {:error/class (type e)
    :error/message #?(:clj (.getMessage e) :cljr (.Message e))
    :error/data (ex-data e)})
-
-(defn eval-expectation [form]
-  (try
-    (eval form)
-    (catch #?(:clj Exception :cljr System.Exception) _
-      form)))
 
 (defn bind-repl-vars! [result]
   (set! *3 *2)

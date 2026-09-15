@@ -40,14 +40,14 @@
 
 ^:rct/test
 (comment
-  ;; a keyword head takes one or two arguments, so none throws and it reads as data
-  (one-tag) ;=> (:a)
+  ;; quote a seq to compare it as data
+  (one-tag) ;=> '(:a)
 
-  ;; a number in head position cannot be called at all
-  (map inc (range 1)) ;=> (1)
+  ;; a vector equals a seq, so it needs no quote
+  (map inc (range 1)) ;=> [1]
 
-  ;; a symbol is compared, not resolved
-  (a-symbol) ;=> foo
+  ;; quote a symbol to compare it as data
+  (a-symbol) ;=> 'foo
 
   ;; an expectation that evaluates yields its value
   (count (one-tag)) ;=> (inc 0)
