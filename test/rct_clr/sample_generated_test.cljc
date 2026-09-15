@@ -121,7 +121,7 @@
   (testing "sample.cljc:257" (rct-clr.sample-generated-test/run-form! "sample.cljc:257" (quote (try (parse-config {:port 8080}) (clojure.test/is false "Expected exception") (catch System.Exception e (set! *e e) (matcho.core/assert #:error{:data {:missing :host}} (rct-clr.sample-generated-test/error->map e))))))))
 (defn- rct-clr-sample-rct-block-15 []
   ;; sample.cljc:272
-  (testing "sample.cljc:272" (rct-clr.sample-generated-test/run-form! "sample.cljc:272" (quote (clojure.test/is (= {"a" 1, "b" {"c" 2}} (rct-clr.sample-generated-test/bind-repl-vars! (stringify-keys {:b {:c 2}, :a 1}))))))))
+  (testing "sample.cljc:272" (rct-clr.sample-generated-test/run-form! "sample.cljc:272" (quote (clojure.test/is (= {"a" 1, "b" {"c" 2}} (rct-clr.sample-generated-test/bind-repl-vars! (stringify-keys {:a 1, :b {:c 2}}))))))))
 (defn- rct-clr-sample-rct-block-16 []
   ;; sample.cljc:282
   (testing "sample.cljc:282" (rct-clr.sample-generated-test/run-form! "sample.cljc:282" (quote (clojure.test/is (= true (rct-clr.sample-generated-test/bind-repl-vars! (truthy? 1)))))))
