@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- rct-clr publishes to Clojars as `sg.flybot/rct-clr`, so a consumer depends on a version instead of pinning a git sha ([#23](https://github.com/flybot-sg/rct-clr/issues/23))
+
 ### Changed
 
 - A `=>` expectation runs as code, as [`rich-comment-tests`](https://github.com/robertluo/rich-comment-tests) `v1.1.82` runs it. A seq is a call, and a symbol resolves. Write `'(1 2 3)` or `[1 2 3]` to compare a seq as data ([#26](https://github.com/flybot-sg/rct-clr/issues/26))

@@ -1,5 +1,7 @@
 # rct-clr
 
+[![Clojars Project](https://img.shields.io/clojars/v/sg.flybot/rct-clr.svg)](https://clojars.org/sg.flybot/rct-clr)
+
 Generates CLR-compatible test files from [Rich Comment Tests](https://github.com/robertluo/rich-comment-tests) (`^:rct/test`) blocks.
 
 ## Rationale
@@ -112,12 +114,10 @@ Add as a dev dependency:
 
 ```clojure
 {:aliases
- {:dev {:extra-deps {io.github.flybot-sg/rct-clr
-                     {:git/url "https://github.com/flybot-sg/rct-clr"
-                      :git/sha "..."}}}}}
+ {:dev {:extra-deps {sg.flybot/rct-clr {:mvn/version "0.1.0"}}}}}
 ```
 
-Since `rct-clr` transitively brings in `rich-comment-tests`, you can remove any existing direct RCT dependency from your `deps.edn`.
+`rct-clr` brings in `rich-comment-tests` 1.1.82, so remove any direct RCT dependency from your `deps.edn`.
 
 #### deps-clr.edn
 
