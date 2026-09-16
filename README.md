@@ -1,14 +1,28 @@
-# rct-clr
+<p align="center">
+  <img src="docs/logo.svg" width="96" height="96" alt="rct-clr logo">
+</p>
+<h1 align="center">rct-clr</h1>
+<p align="center">
+  <a href="https://clojars.org/sg.flybot/rct-clr"><img src="https://img.shields.io/clojars/v/sg.flybot/rct-clr.svg" alt="Clojars"></a>
+  <img src="https://github.com/flybot-sg/rct-clr/actions/workflows/test.yml/badge.svg" alt="CI">
+  <img src="https://img.shields.io/badge/license-Unlicense-blue.svg" alt="License: Unlicense">
+</p>
 
-[![Clojars Project](https://img.shields.io/clojars/v/sg.flybot/rct-clr.svg)](https://clojars.org/sg.flybot/rct-clr)
-
-Generates CLR-compatible test files from [Rich Comment Tests](https://github.com/robertluo/rich-comment-tests) (`^:rct/test`) blocks.
+<p align="center">
+  Reads <a href="https://github.com/robertluo/rich-comment-tests">Rich Comment Tests</a> (<code>^:rct/test</code>) blocks on the JVM and writes a <code>deftest</code> file for the CLR.
+</p>
 
 ## Rationale
 
 A cross-platform library runs its `deftest` suites on the CLR. Its `^:rct/test` blocks are tests too, but `rich-comment-tests` needs rewrite-clj and tools.namespace to extract them, and neither runs on the CLR.
 
-Porting RCT would mean porting its reader and its rewriter, when the blocks only have to become assertions. `nos` and `cljr` already run `deftest`, so this generates one.
+Porting RCT would mean porting its reader and its rewriter, when the blocks only have to become assertions. [`nos`](https://github.com/flybot-sg/magic/blob/main/docs/nos-cli.md) and [`cljr`](https://github.com/clojure/clr.core.cli) already run `deftest`, so this generates one.
+
+The generated file targets the CLR, not both platforms:
+
+- **`throws=>>` catches `System.Exception`**: emitted plain, with no reader conditional. The JVM compiler rejects that type
+- **`#?` resolves at generation time**: the generator reads with `:features #{:cljr}`, so only the CLR branch reaches the file
+- **The namespace carries `^:clr-only`**: a JVM test runner filtering on that metadata skips the file
 
 ## Writing cross-platform RCT tests
 
@@ -110,16 +124,25 @@ clojure -M:dev -m rct-clr.gen \
 
 #### deps.edn
 
-Add as a dev dependency:
+Remember that `rct-clr` is a **JVM** lib that generates `deftest`s runnable on the CLR.
+
+Both entries are JVM-side:
 
 ```clojure
 {:aliases
- {:dev {:extra-deps {sg.flybot/rct-clr {:mvn/version "0.1.0"}}}}}
+ {:dev {:extra-deps {;; runs the ^:rct/test blocks on the JVM
+                     io.github.robertluo/rich-comment-tests {:mvn/version "1.1.82"}
+                     ;; generates the CLR test file from those same blocks
+                     sg.flybot/rct-clr                      {:mvn/version "0.1.0"}}}}}
 ```
 
-`rct-clr` brings in `rich-comment-tests` 1.1.82, so remove any direct RCT dependency from your `deps.edn`.
+Pin [`robertluo/rich-comment-tests`](https://github.com/robertluo/rich-comment-tests), the fork `rct-clr` matches. It keeps the original `com.mjdowney` namespace, so that is what you require.
 
 #### deps-clr.edn
+
+Once the `deftest` file is generated, you need a way to run it. That happens on the **CLR** side.
+
+The CLR reads the generated file, never the generator.
 
 CLR coordinates go in [`deps-clr.edn`](https://github.com/flybot-sg/magic/blob/main/docs/clr-dependency-files.md). Two entries matter here: matcho, which the generated tests call for `=>>` patterns, and the ClojureCLR test runner that drives `cljr -X:test`.
 
@@ -127,8 +150,10 @@ CLR coordinates go in [`deps-clr.edn`](https://github.com/flybot-sg/magic/blob/m
 {:paths ["src"]
  :aliases
  {:test {:extra-paths ["test"]
-         :extra-deps  {io.github.dmiller/test-runner {:git/tag "v0.5.3clr"
+         :extra-deps  {;; test runner for ClojureCLR
+                       io.github.dmiller/test-runner {:git/tag "v0.5.3clr"
                                                       :git/sha "ae91dd2727bbf70eb3a6d869a19953de3819dfbc"}
+                       ;; the clr-support branch, which adds the deps-clr.edn upstream healthsamurai/matcho lacks.
                        flybot-sg/matcho              {:git/url "https://github.com/flybot-sg/matcho"
                                                       :git/sha "fba2a65485f4d5b1e0a69f94a3d06c467478f53f"}}
          :exec-fn     cognitect.test-runner.api/test
@@ -137,7 +162,14 @@ CLR coordinates go in [`deps-clr.edn`](https://github.com/flybot-sg/magic/blob/m
                        :patterns ["my-project\\.(?!rc-test$).*"]}}}}
 ```
 
-Pin matcho's `clr-support` branch, not `master`: only that branch ships a `deps-clr.edn`, without which `cljr` cannot resolve it.
+#### magic.edn
+
+[`nos test`](https://github.com/flybot-sg/magic/blob/main/docs/nos-cli.md) derives its namespaces from the source paths, so it picks up the JVM-only RCT runner too. Exclude it:
+
+```clojure
+;; test runner config for MAGIC
+{:test {:exclude [my-project.rc-test]}}
+```
 
 #### `bb.edn` - generating CLR test file
 
@@ -157,13 +189,15 @@ If you use Babashka to run scripts, you can do this too:
           :task (do (run 'gen-clr-rct) (shell "cljr" "-X:test"))}}}
 ```
 
-Run those two in CI rather than bare `nos test` / `cljr -X:test`, so the generated file cannot go stale.
+Run those two in CI rather than bare `nos test` / `cljr -X:test`. Each task regenerates the file before it runs the tests.
 
 ### JVM testing setup
 
 #### `rc_test.clj`, the RCT runner
 
-Create a test file that runs RCT blocks on the JVM using the `rich-comment-tests` runner:
+Your lib might target the JVM as well as the CLR. You can still run the RCT tests the way you are used to.
+
+The common way is to create a test file:
 
 ```clojure
 (ns my-project.rc-test
@@ -177,7 +211,9 @@ Create a test file that runs RCT blocks on the JVM using the `rich-comment-tests
 
 #### `tests.edn`
 
-Skip the generated CLR on JVM and split tests into `:rct` and `:unit` suites so they can be run independently:
+You might use Kaocha as the JVM test runner for all your `deftest`s, including the one above that gathers every RCT block into one.
+
+Kaocha has to skip the generated CLR file. Split the rest into `:rct` and `:unit` suites so you can run them independently:
 
 ```clojure
 #kaocha/v1
@@ -198,34 +234,24 @@ To run only the RCT tests on JVM without running the full test suite:
           :task (clojure "-M:dev:test --focus :rct")}}}
 ```
 
-### magic.edn
-
-[`nos test`](https://github.com/flybot-sg/magic/blob/main/docs/nos-cli.md) derives its namespaces from the source paths, so it picks up the JVM-only RCT runner too. Exclude it:
-
-```clojure
-{:test {:exclude [my-project.rc-test]}}
-```
-
-### .gitignore
+### CI
 
 Add the generated file to your `.gitignore`.
 
-### CI notes
+If your CI caches untracked files (e.g. GitLab CI `cache: untracked: true`), delete it before format checks. A copy cached from an earlier run fails the check:
 
-- If your CI caches untracked files (e.g. GitLab CI `cache: untracked: true`), delete the generated file before format checks to avoid stale copies causing failures:
-
-  ```bash
-  rm -f test/my_project/rct_generated_test.cljc
-  ```
+```bash
+rm -f test/my_project/rct_generated_test.cljc
+```
 
 ## Generated test structure
 
 The generated file contains:
 
 - A namespace with `^:clr-only` metadata, which JVM test runners filtering on it skip
-- Three helpers, since the generated file requires only `clojure.test` and `matcho.core` and so cannot call RCT's own: `error->map` builds the map a `throws=>>` pattern matches against, `run-form!` evaluates one form and reports a throw against its own line, and `bind-repl-vars!` carries each result into `*1`
+- Three helpers. The generated file requires only `clojure.test` and `matcho.core`, so it carries its own: `error->map` builds the map a `throws=>>` pattern matches against, `run-form!` evaluates one form and reports a throw against its own line, and `bind-repl-vars!` carries each result into `*1`
 - One `deftest` per source namespace, binding `*ns*` and the REPL vars, with `clojure.test/is` for `=>`, `matcho.core/assert` for `=>>`, and `try`/`catch` plus matcho for `throws=>>`
-- A form with no assertion (`def`, `require`) is emitted for its side effect
+- The generator emits a form with no assertion (`def`, `require`) for its side effect
 
 Example output (abbreviated):
 
@@ -236,26 +262,7 @@ Example output (abbreviated):
             [matcho.core]
             [my-project.core]))
 
-(defn error->map [e]
-  {:error/class (type e)
-   :error/message #?(:clj (.getMessage e) :cljr (.Message e))
-   :error/data (ex-data e)})
-
-(defn run-form! [loc form]
-  (try
-    (eval form)
-    (catch #?(:clj Exception :cljr System.Exception) e
-      (clojure.test/do-report
-       {:type :error
-        :message (str "Got " (type e) " evaluating " loc)
-        :expected nil
-        :actual e}))))
-
-(defn bind-repl-vars! [result]
-  (set! *3 *2)
-  (set! *2 *1)
-  (set! *1 result)
-  result)
+;; error->map, run-form! and bind-repl-vars! are defined here
 
 ;; my-project.core
 (defn- my-project-core-rct-block-0 []
