@@ -255,14 +255,14 @@
 
 (deftest file->ns-sym-test
   (is (= 'rct-clr.gen
-         (gen/file->ns-sym (io/file "src/rct_clr/gen.cljc")))))
+         (gen/file->ns-sym (io/file "src/rct_clr/gen.clj")))))
 
 (deftest file->ns-sym-no-ns-test
   (with-tmp-dir [dir {"no_ns.cljc" "(defn stray [] :oops)"}]
     (is (nil? (gen/file->ns-sym (io/file dir "no_ns.cljc"))))))
 
 (deftest file->rct-blocks-test
-  (let [blocks (gen/file->rct-blocks (io/file "src/rct_clr/gen.cljc") 'rct-clr.gen)
+  (let [blocks (gen/file->rct-blocks (io/file "src/rct_clr/gen.clj") 'rct-clr.gen)
         datums (mapcat identity blocks)
         valid-types #{nil '=> '=>> 'throws=>>}]
     (testing "finds all RCT blocks"
