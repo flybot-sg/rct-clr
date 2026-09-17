@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Based on [robertluo/rich-comment-tests](https://github.com/robertluo/rich-comment-tests)**: the fork, not matthewdowney's original. A `=>` expectation runs as code, and the generated test matches that
 - **CLR test generation**: `rct-clr.gen` reads `^:rct/test` blocks and writes a `.cljc` test file the CLR can run
 - **Three assertion types**: `clojure.test/is` for `=>`, `matcho.core/assert` for `=>>`, try/catch plus matcho for `throws=>>`
-- **Reader conditionals**: `#?` resolves to the `:cljr` branch, in the test expression and in the expectation
+- **Reader conditionals**: `#?` in an expectation resolves to the `:cljr` branch
 - **Namespaced keywords**: `::kw` and `::alias/kw` resolve against the source namespace
 - **REPL vars**: `*1`, `*2`, `*3` and `*e` bind across a block, so a form chains off the previous result
 - **Per-form error reporting**: a throw reports against its own line, then the next form runs
