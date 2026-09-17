@@ -14,9 +14,11 @@
 
 ## Rationale
 
-A cross-platform library runs its `deftest` suites on the CLR. Its `^:rct/test` blocks are tests too, but `rich-comment-tests` needs rewrite-clj and tools.namespace to extract them, and neither runs on the CLR.
+A cross-platform library runs its `deftest` suites on the CLR. Its `^:rct/test` blocks are tests too. `rich-comment-tests` needs rewrite-clj and tools.namespace to read them. Nobody has ported rewrite-clj to the CLR.
 
-Porting RCT would mean porting its reader and its rewriter, when the blocks only have to become assertions. [`nos`](https://github.com/flybot-sg/magic/blob/main/docs/nos-cli.md) and [`cljr`](https://github.com/clojure/clr.core.cli) already run `deftest`, so this generates one.
+tools.namespace has David Miller's port, `clr.tools.namespace`. ClojureCLR runs it. MAGIC does not load it: `clr.tools.reader` imports `clojure.lang.Reflector`. MAGIC drops that class to compile every call ahead of time for Unity.
+
+Porting RCT means porting rewrite-clj, then carrying that fork. The blocks only have to become assertions. [`nos`](https://github.com/flybot-sg/magic/blob/main/docs/nos-cli.md) and [`cljr`](https://github.com/clojure/clr.core.cli) already run `deftest`, so this generates one.
 
 The generated file targets the CLR, not both platforms:
 
