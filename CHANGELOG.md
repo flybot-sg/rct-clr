@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1](https://github.com/flybot-sg/rct-clr/tree/v0.1.1) - 2026-09-17
+
+### Fixed
+
+- The rationale in the README
+
 ## [0.1.0](https://github.com/flybot-sg/rct-clr/tree/v0.1.0) - 2026-09-16
 
 ### Added
