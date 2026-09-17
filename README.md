@@ -107,9 +107,11 @@ See [`examples/`](examples/), [`examples_clr/`](examples_clr/), and [`examples_j
 
 ```bash
 clojure -M:dev -m rct-clr.gen \
-  -o test/my_project/rct_generated_test.cljc \
+  -o test-clr/my_project/rct_generated_test.cljc \
   -n my-project.rct-generated-test
 ```
+
+Write the file to a CLR-only directory, not to `test/`. A ClojureScript build ignores `^:clr-only`. Keep the directory off the ClojureScript source paths, so no test discovery reaches it. The generated namespace requires matcho, and ClojureScript rejects matcho's `ns` form.
 
 ### Options
 
@@ -151,7 +153,7 @@ CLR coordinates go in [`deps-clr.edn`](https://github.com/flybot-sg/magic/blob/m
 ```clojure
 {:paths ["src"]
  :aliases
- {:test {:extra-paths ["test"]
+ {:test {:extra-paths ["test" "test-clr"]
          :extra-deps  {;; test runner for ClojureCLR
                        io.github.dmiller/test-runner {:git/tag "v0.5.3clr"
                                                       :git/sha "ae91dd2727bbf70eb3a6d869a19953de3819dfbc"}
@@ -160,7 +162,7 @@ CLR coordinates go in [`deps-clr.edn`](https://github.com/flybot-sg/magic/blob/m
                                                       :git/sha "fba2a65485f4d5b1e0a69f94a3d06c467478f53f"}}
          :exec-fn     cognitect.test-runner.api/test
          ;; the JVM-only RCT runner lives in test/ too, and cljr would load it
-         :exec-args   {:dirs     ["test"]
+         :exec-args   {:dirs     ["test" "test-clr"]
                        :patterns ["my-project\\.(?!rc-test$).*"]}}}}
 ```
 
@@ -182,7 +184,7 @@ If you use Babashka to run scripts, you can do this too:
          {:doc  "Generate CLR-compatible RCT test file"
           ;; -M:dev, not -M:dev:test: a :test alias carrying kaocha's :main-opts
           ;; would shadow -m rct-clr.gen
-          :task (clojure "-M:dev -m rct-clr.gen -o test/my_project/rct_generated_test.cljc -n my-project.rct-generated-test")}
+          :task (clojure "-M:dev -m rct-clr.gen -o test-clr/my_project/rct_generated_test.cljc -n my-project.rct-generated-test")}
          magic-test
          {:doc  "Regenerate the RCT test file and run the CLR tests on MAGIC"
           :task (do (run 'gen-clr-rct) (shell "nos" "test"))}
@@ -215,12 +217,11 @@ The common way is to create a test file:
 
 You might use Kaocha as the JVM test runner for all your `deftest`s, including the one above that gathers every RCT block into one.
 
-Kaocha has to skip the generated CLR file. Split the rest into `:rct` and `:unit` suites so you can run them independently:
+Split the suites into `:rct` and `:unit` so you can run them independently:
 
 ```clojure
 #kaocha/v1
- {:kaocha.filter/skip-meta [:clr-only]
-  :tests [{:id :rct
+ {:tests [{:id :rct
            :focus-meta [:rct]}
           {:id :unit
            :skip-meta [:rct]}]}
@@ -243,7 +244,7 @@ Add the generated file to your `.gitignore`.
 If your CI caches untracked files (e.g. GitLab CI `cache: untracked: true`), delete it before format checks. A copy cached from an earlier run fails the check:
 
 ```bash
-rm -f test/my_project/rct_generated_test.cljc
+rm -f test-clr/my_project/rct_generated_test.cljc
 ```
 
 ## Generated test structure
