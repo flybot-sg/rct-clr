@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2](https://github.com/flybot-sg/rct-clr/tree/v0.1.2) - 2026-09-17
+
+### Fixed
+
+- cljdoc builds the API docs. The `.cljc` extension made it analyze the JVM-only `gen` namespace as ClojureScript. It is now `gen.clj`
+
+### Changed
+
+- The README generates into `test-clr/`, not `test/`. A ClojureScript build ignores `^:clr-only` and compiles the generated file
+
 ## [0.1.1](https://github.com/flybot-sg/rct-clr/tree/v0.1.1) - 2026-09-17
 
 ### Fixed

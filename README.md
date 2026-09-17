@@ -137,7 +137,7 @@ Both entries are JVM-side:
  {:dev {:extra-deps {;; runs the ^:rct/test blocks on the JVM
                      io.github.robertluo/rich-comment-tests {:mvn/version "1.1.82"}
                      ;; generates the CLR test file from those same blocks
-                     sg.flybot/rct-clr                      {:mvn/version "0.1.1"}}}}}
+                     sg.flybot/rct-clr                      {:mvn/version "0.1.2"}}}}}
 ```
 
 Pin [`robertluo/rich-comment-tests`](https://github.com/robertluo/rich-comment-tests), the fork `rct-clr` matches. It keeps the original `com.mjdowney` namespace, so that is what you require.
